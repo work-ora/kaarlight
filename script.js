@@ -993,12 +993,20 @@ const AuthManager = {
             auth.onAuthStateChanged((fbUser) => {
                 if (fbUser && fbUser.uid) {
                     const providerInfo = Array.isArray(fbUser.providerData) ? fbUser.providerData[0] : null;
+                    const localUser = Storage.getCurrentUser();
+                    const sameUser = localUser
+                        && (String(localUser.id || '') === String(fbUser.uid)
+                            || (localUser.email && fbUser.email && localUser.email === fbUser.email));
                     const syncedUser = {
                         id: fbUser.uid,
-                        email: fbUser.email || '',
-                        fullname: fbUser.displayName || 'User',
-                        phone: fbUser.phoneNumber || '',
-                        authProvider: providerInfo?.providerId || ''
+                        email: fbUser.email || (sameUser ? localUser.email : '') || '',
+                        fullname: (sameUser ? localUser.fullname : '') || fbUser.displayName || 'User',
+                        phone: (sameUser ? localUser.phone : '') || fbUser.phoneNumber || '',
+                        type: sameUser ? (localUser.type || 'User') : 'User',
+                        portfolio: sameUser ? (localUser.portfolio || '') : '',
+                        bio: sameUser ? (localUser.bio || '') : '',
+                        avatar: sameUser ? (localUser.avatar || '') : '',
+                        authProvider: providerInfo?.providerId || (sameUser ? (localUser.authProvider || '') : '')
                     };
                     localStorage.setItem(APP_KEYS.USER, JSON.stringify(syncedUser));
                     localStorage.setItem('afg_auth_source', 'firebase');
