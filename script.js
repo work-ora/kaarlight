@@ -1734,6 +1734,20 @@ const JobSeekerHandler = {
     }
 };
 
+const AdminAccess = {
+    ensure(listEl, emptyEl, clearBtn) {
+        const user = Storage.getCurrentUser();
+        if (Utils.isAdmin(user)) return true;
+
+        if (listEl) {
+            listEl.innerHTML = '<div class="empty-state-container"><h4>Access denied</h4><p>This page is restricted.</p></div>';
+        }
+        if (emptyEl) emptyEl.style.display = 'none';
+        if (clearBtn) clearBtn.style.display = 'none';
+        return false;
+    }
+};
+
 const ReportsManager = {
     async fetchReports() {
         if (FirebaseStore.enabled && FirebaseStore.db) {
@@ -1859,14 +1873,8 @@ const ReportsManager = {
         if (!list) return;
 
         const clearBtn = document.getElementById('clear-reports-btn');
-        const user = Storage.getCurrentUser();
-        if (!Utils.isAdmin(user)) {
-            list.innerHTML = '<div class="empty-state-container"><h4>Access denied</h4><p>This page is restricted.</p></div>';
-            if (clearBtn) clearBtn.style.display = 'none';
-            const empty = document.getElementById('reports-empty');
-            if (empty) empty.style.display = 'none';
-            return;
-        }
+        const empty = document.getElementById('reports-empty');
+        if (!AdminAccess.ensure(list, empty, clearBtn)) return;
 
         const reports = await this.fetchReports();
         this.renderReports(reports);
@@ -1876,6 +1884,143 @@ const ReportsManager = {
             await this.clearReports();
             const refreshed = await this.fetchReports();
             this.renderReports(refreshed);
+        });
+    }
+};
+
+const FeedbackAdminManager = {
+    async fetchFeedback() {
+        if (FirebaseStore.enabled && FirebaseStore.db) {
+            try {
+                const snapshot = await FirebaseStore.db
+                    .collection(FEEDBACK_COLLECTION)
+                    .orderBy('createdAtMs', 'desc')
+                    .limit(FEEDBACK_LIMIT)
+                    .get();
+                return snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    __source: 'firebase'
+                }));
+            } catch {
+                // Fall back to local storage below.
+            }
+        }
+
+        return Utils.readJson(APP_KEYS.FEEDBACK, []).map((item, index) => ({
+            id: item.id || `local-${index}`,
+            ...item,
+            __source: 'local'
+        }));
+    },
+
+    renderFeedback(items) {
+        const list = document.getElementById('feedback-list');
+        const empty = document.getElementById('feedback-empty');
+        if (!list) return;
+
+        if (!Array.isArray(items) || items.length === 0) {
+            list.innerHTML = '';
+            if (empty) empty.style.display = 'block';
+            return;
+        }
+
+        if (empty) empty.style.display = 'none';
+        list.innerHTML = items.map((item) => {
+            const name = Utils.escapeHtml(item.name || 'Anonymous');
+            const email = Utils.escapeHtml(item.email || '');
+            const message = Utils.escapeHtml(item.message || '');
+            const createdAt = item.createdAt
+                ? new Date(item.createdAt).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+                : (item.timestamp ? new Date(item.timestamp).toLocaleString('en-US') : '-');
+            const source = Utils.escapeHtml(String(item.__source || 'local'));
+            const itemId = Utils.escapeHtml(String(item.id || ''));
+
+            return `
+                <div class="report-card">
+                    <div class="report-title">Feedback from ${name}</div>
+                    <div class="report-meta">
+                        ${email ? `<span>${email}</span>` : ''}
+                        <span>${createdAt}</span>
+                    </div>
+                    ${message ? `<div class="report-details">${message}</div>` : ''}
+                    <div class="report-actions">
+                        <button class="btn danger small" data-feedback-id="${itemId}" data-feedback-source="${source}">Delete Feedback</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        list.querySelectorAll('button[data-feedback-id]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                const id = btn.getAttribute('data-feedback-id');
+                const source = btn.getAttribute('data-feedback-source') || 'local';
+                if (!confirm('Delete this feedback item?')) return;
+                await this.deleteFeedback(id, source);
+                const refreshed = await this.fetchFeedback();
+                this.renderFeedback(refreshed);
+            });
+        });
+    },
+
+    async deleteFeedback(id, source) {
+        if (source === 'firebase' && FirebaseStore.enabled && FirebaseStore.db) {
+            try {
+                await FirebaseStore.db.collection(FEEDBACK_COLLECTION).doc(String(id)).delete();
+                return;
+            } catch {
+                // Fall back to local if needed.
+            }
+        }
+
+        const feedback = Utils.readJson(APP_KEYS.FEEDBACK, []);
+        const updated = feedback.filter((item) => String(item.id) !== String(id));
+        localStorage.setItem(APP_KEYS.FEEDBACK, JSON.stringify(updated));
+    },
+
+    async clearFeedback() {
+        if (FirebaseStore.enabled && FirebaseStore.db) {
+            try {
+                const snapshot = await FirebaseStore.db
+                    .collection(FEEDBACK_COLLECTION)
+                    .orderBy('createdAtMs', 'desc')
+                    .limit(FEEDBACK_LIMIT)
+                    .get();
+                if (snapshot.empty) return;
+                const batch = FirebaseStore.db.batch();
+                snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+                await batch.commit();
+                return;
+            } catch {
+                // Fall back to local if needed.
+            }
+        }
+
+        localStorage.setItem(APP_KEYS.FEEDBACK, JSON.stringify([]));
+    },
+
+    async init() {
+        const list = document.getElementById('feedback-list');
+        if (!list) return;
+
+        const clearBtn = document.getElementById('clear-feedback-btn');
+        const empty = document.getElementById('feedback-empty');
+        if (!AdminAccess.ensure(list, empty, clearBtn)) return;
+
+        const items = await this.fetchFeedback();
+        this.renderFeedback(items);
+
+        clearBtn?.addEventListener('click', async () => {
+            if (!confirm('Clear all feedback?')) return;
+            await this.clearFeedback();
+            const refreshed = await this.fetchFeedback();
+            this.renderFeedback(refreshed);
         });
     }
 };
@@ -1929,6 +2074,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     NewsletterHandler.init();
     JobSeekerHandler.init();
     ReportsManager.init();
+    FeedbackAdminManager.init();
 
     const allJobs = await Storage.getAllJobsAsync();
     // Avoid overriding the filtered results on pages where search/filter controls exist.
