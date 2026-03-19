@@ -54,30 +54,30 @@
 
   <main id="main-content" class="container">
     <section class="admin-reports-hero">
-      <h2>Reported Jobs</h2>
-      <p class="lead">Review reports submitted by users. Reports are stored in Firestore.</p>
+      <h2 data-i18n="admin_reports_title">Reported Jobs</h2>
+      <p class="lead" data-i18n="admin_reports_lead">Review reports submitted by users. Reports are stored in Firestore.</p>
     </section>
 
     <section class="admin-reports-section">
       <div class="admin-reports-actions">
-        <button id="clear-reports-btn" class="btn outline">Clear All Reports</button>
+        <button id="clear-reports-btn" class="btn outline" data-i18n="admin_clear_reports">Clear All Reports</button>
       </div>
       <div id="reports-empty" class="empty-state-container" style="display: none;">
         <div class="empty-icon">✅</div>
-        <h4>No reports yet</h4>
-        <p>Reports will appear here when users report a job.</p>
+        <h4 data-i18n="admin_no_reports_title">No reports yet</h4>
+        <p data-i18n="admin_no_reports_body">Reports will appear here when users report a job.</p>
       </div>
       <div id="reports-list" class="reports-list"></div>
     </section>
     <section class="admin-reports-section">
-      <h3 style="margin-bottom: 0.75rem;">Feedback</h3>
+      <h3 style="margin-bottom: 0.75rem;" data-i18n="admin_feedback_title">Feedback</h3>
       <div class="admin-reports-actions">
-        <button id="clear-feedback-btn" class="btn outline">Clear All Feedback</button>
+        <button id="clear-feedback-btn" class="btn outline" data-i18n="admin_clear_feedback">Clear All Feedback</button>
       </div>
       <div id="feedback-empty" class="empty-state-container" style="display: none;">
         <div class="empty-icon">âœ…</div>
-        <h4>No feedback yet</h4>
-        <p>Feedback will appear here when users send a message.</p>
+        <h4 data-i18n="admin_no_feedback_title">No feedback yet</h4>
+        <p data-i18n="admin_no_feedback_body">Feedback will appear here when users send a message.</p>
       </div>
       <div id="feedback-list" class="reports-list"></div>
     </section>

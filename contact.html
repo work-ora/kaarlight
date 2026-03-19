@@ -54,34 +54,34 @@
 
   <main id="main-content" class="container">
     <section class="about-hero">
-      <h2>Contact AfgJobs</h2>
-      <p class="lead">Need help, want to report an issue, or have a suggestion? Reach us here.</p>
+      <h2 data-i18n="contact_title">Contact AfgJobs</h2>
+      <p class="lead" data-i18n="contact_lead">Need help, want to report an issue, or have a suggestion? Reach us here.</p>
     </section>
 
     <section class="grid-3">
       <article class="card small">
-        <h3>Email Support</h3>
-        <p>For account, posting, or technical questions.</p>
+        <h3 data-i18n="contact_email_title">Email Support</h3>
+        <p data-i18n="contact_email_text">For account, posting, or technical questions.</p>
         <p><a href="mailto:support@afgjobs.com">support@afgjobs.com</a></p>
       </article>
       <article class="card small">
-        <h3>Business Inquiries</h3>
-        <p>Partnerships, hiring campaigns, and media requests.</p>
+        <h3 data-i18n="contact_business_title">Business Inquiries</h3>
+        <p data-i18n="contact_business_text">Partnerships, hiring campaigns, and media requests.</p>
         <p><a href="mailto:business@afgjobs.com">business@afgjobs.com</a></p>
       </article>
       <article class="card small">
-        <h3>Response Time</h3>
-        <p>We usually reply within 24-48 hours on working days.</p>
+        <h3 data-i18n="contact_response_title">Response Time</h3>
+        <p data-i18n="contact_response_text">We usually reply within 24-48 hours on working days.</p>
       </article>
     </section>
 
     <section class="feedback-section">
-      <h3>Send a Message</h3>
+      <h3 data-i18n="contact_send_title">Send a Message</h3>
       <form id="feedback-form" class="feedback-form">
-        <input type="text" id="feedback-name" name="name" placeholder="Your name (optional)" maxlength="100">
-        <input type="email" id="feedback-email" name="email" placeholder="Your email (optional)" maxlength="100">
-        <textarea id="feedback-message" name="message" placeholder="Tell us how we can help..." rows="5" maxlength="500" required></textarea>
-        <button type="submit" class="btn">Send Message</button>
+        <input type="text" id="feedback-name" name="name" data-i18n-placeholder="contact_feedback_name_placeholder" placeholder="Your name (optional)" maxlength="100">
+        <input type="email" id="feedback-email" name="email" data-i18n-placeholder="contact_feedback_email_placeholder" placeholder="Your email (optional)" maxlength="100">
+        <textarea id="feedback-message" name="message" data-i18n-placeholder="contact_feedback_message_placeholder" placeholder="Tell us how we can help..." rows="5" maxlength="500" required></textarea>
+        <button type="submit" class="btn" data-i18n="contact_feedback_send">Send Message</button>
         <p id="feedback-msg" class="feedback-msg" aria-live="polite"></p>
       </form>
     </section>
