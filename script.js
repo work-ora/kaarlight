@@ -42,9 +42,9 @@ const DEFAULT_SETTINGS = {
 
 const DEFAULT_JOBS = [];
 
-const CloudinaryUploader = {
+const R2Uploader = {
     getConfig() {
-        return window.CLOUDINARY_CONFIG || {};
+        return window.R2_UPLOAD_CONFIG || {};
     },
 
     isPlaceholder(value) {
@@ -55,26 +55,34 @@ const CloudinaryUploader = {
     isConfigured() {
         const config = this.getConfig();
         return Boolean(
-            config.cloudName
-            && config.uploadPreset
-            && !this.isPlaceholder(config.cloudName)
-            && !this.isPlaceholder(config.uploadPreset)
+            config.workerUrl
+            && config.publicBaseUrl
+            && !this.isPlaceholder(config.workerUrl)
+            && !this.isPlaceholder(config.publicBaseUrl)
         );
     },
 
     getSetupError() {
         const config = this.getConfig();
         if (this.isConfigured()) return '';
-        if (this.isPlaceholder(config.cloudName) || this.isPlaceholder(config.uploadPreset)) {
-            return 'Cloudinary is not configured yet. Update cloudinary-config.js with your cloud name and unsigned upload preset.';
+        if (this.isPlaceholder(config.workerUrl) || this.isPlaceholder(config.publicBaseUrl)) {
+            return 'R2 is not configured yet. Update r2-config.js with your Worker URL and public bucket URL.';
         }
-        return 'Cloudinary is not configured.';
+        return 'R2 is not configured.';
     },
 
-    buildFolder(config, extraFolder) {
-        const baseFolder = String(config.folder || '').trim().replace(/^\/+|\/+$/g, '');
+    buildPath(config, extraFolder) {
+        const baseFolder = String(config.basePath || '').trim().replace(/^\/+|\/+$/g, '');
         const childFolder = String(extraFolder || '').trim().replace(/^\/+|\/+$/g, '');
         return [baseFolder, childFolder].filter(Boolean).join('/');
+    },
+
+    sanitizeFileName(name) {
+        return String(name || 'upload')
+            .replace(/[^a-zA-Z0-9._-]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            .slice(0, 80) || 'upload';
     },
 
     async uploadFile(file, options = {}) {
@@ -83,41 +91,48 @@ const CloudinaryUploader = {
             throw new Error(this.getSetupError());
         }
 
-        const resourceType = options.resourceType
-            || (file?.type?.startsWith('video/') ? 'video' : 'image');
-        const endpoint = `https://api.cloudinary.com/v1_1/${config.cloudName}/${resourceType}/upload`;
-        const form = new FormData();
-        form.append('file', file);
-        form.append('upload_preset', config.uploadPreset);
-
-        const folder = this.buildFolder(config, options.folder);
-        if (folder) form.append('folder', folder);
-        if (Array.isArray(options.tags) && options.tags.length > 0) {
-            form.append('tags', options.tags.join(','));
+        const maxSizeBytes = Number(config.maxFileSizeMb || 2) * 1024 * 1024;
+        if (file?.size > maxSizeBytes) {
+            throw new Error(`File must be ${config.maxFileSizeMb || 2}MB or smaller.`);
         }
 
-        const response = await fetch(endpoint, {
+        const folder = this.buildPath(config, options.folder);
+        const safeName = this.sanitizeFileName(file?.name);
+        const objectKey = [folder, `${Date.now()}-${safeName}`].filter(Boolean).join('/');
+        const response = await fetch(String(config.workerUrl).trim(), {
             method: 'POST',
-            body: form
+            body: file,
+            headers: {
+                'Content-Type': file?.type || 'application/octet-stream',
+                'X-File-Key': objectKey,
+                'X-File-Name': safeName,
+                'X-File-Type': file?.type || 'application/octet-stream',
+                'X-Upload-Tags': Array.isArray(options.tags) ? options.tags.join(',') : ''
+            }
         });
 
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
-            const errorMessage = payload?.error?.message || 'Cloudinary upload failed.';
+            const errorMessage = payload?.error || payload?.message || 'R2 upload failed.';
             throw new Error(errorMessage);
         }
 
+        const publicBaseUrl = String(config.publicBaseUrl || '').trim().replace(/\/+$/g, '');
+        const publicUrl = payload?.url || (publicBaseUrl ? `${publicBaseUrl}/${objectKey}` : '');
+        const resourceType = options.resourceType
+            || (file?.type?.startsWith('video/') ? 'video' : 'image');
+
         return {
-            url: payload.secure_url || payload.url || '',
-            resourceType: payload.resource_type || resourceType,
-            publicId: payload.public_id || '',
-            format: payload.format || '',
-            bytes: payload.bytes || 0
+            url: publicUrl,
+            resourceType,
+            publicId: payload?.key || objectKey,
+            format: file?.type || '',
+            bytes: payload?.size || file?.size || 0
         };
     }
 };
 
-window.CloudinaryUploader = CloudinaryUploader;
+window.R2Uploader = R2Uploader;
 
 const Utils = {
     escapeHtml(value) {
@@ -1545,9 +1560,15 @@ const LanguageManager = {
         if (heroSearchBtn) heroSearchBtn.textContent = this.t('hero_search_btn');
 
         const userDisplay = document.getElementById('user-display');
+        const mobileWelcome = document.getElementById('mobile-welcome');
         const currentUser = Storage.getCurrentUser();
         if (userDisplay && currentUser) {
             userDisplay.textContent = this.formatWelcome(currentUser.fullname || 'User');
+        }
+        if (mobileWelcome) {
+            mobileWelcome.textContent = currentUser
+                ? this.formatWelcome(currentUser.fullname || 'User')
+                : this.t('welcome_prefix') + ' User';
         }
 
         document.querySelectorAll('[data-i18n]').forEach((el) => {
@@ -1585,6 +1606,8 @@ const AuthManager = {
         const profileLink = document.getElementById('profile-link');
         const settingsLink = document.getElementById('settings-link');
         const logoutBtn = document.getElementById('logout-btn');
+        const mobileAccountLink = document.getElementById('mobile-account-link');
+        const mobileWelcome = document.getElementById('mobile-welcome');
         const navAuth = document.querySelector('.nav-auth');
         let adminLink = document.getElementById('admin-reports-link');
 
@@ -1609,6 +1632,8 @@ const AuthManager = {
             if (settingsLink) settingsLink.style.display = 'none';
             if (adminLink) adminLink.style.display = 'none';
             logoutBtn.style.display = 'none';
+            if (mobileAccountLink) mobileAccountLink.href = 'auth.html';
+            if (mobileWelcome) mobileWelcome.textContent = LanguageManager.t('welcome_prefix') + ' User';
         };
 
         const applySignedIn = (user) => {
@@ -1623,6 +1648,8 @@ const AuthManager = {
             if (settingsLink) settingsLink.style.display = 'inline';
             if (adminLink) adminLink.style.display = Utils.isAdmin(user) ? 'inline' : 'none';
             logoutBtn.style.display = 'inline';
+            if (mobileAccountLink) mobileAccountLink.href = 'profile.html';
+            if (mobileWelcome) mobileWelcome.textContent = LanguageManager.formatWelcome(user.fullname || 'User');
         };
 
         const syncWelcomeFromStorage = () => {
@@ -1879,10 +1906,10 @@ const FormHandler = {
                 media = existingJob.media || '';
                 mediaType = existingJob.mediaType || '';
             } else if (this.mediaFile) {
-                if (CloudinaryUploader.isConfigured()) {
+                if (R2Uploader.isConfigured()) {
                     try {
                         const resourceType = this.mediaFile.type.startsWith('video/') ? 'video' : 'image';
-                        const result = await CloudinaryUploader.uploadFile(this.mediaFile, {
+                        const result = await R2Uploader.uploadFile(this.mediaFile, {
                             folder: 'jobs',
                             tags: ['job-media'],
                             resourceType
