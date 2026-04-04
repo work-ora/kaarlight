@@ -1672,6 +1672,10 @@ label {
     border-radius: 14px;
     background: var(--accent-bg);
   }
+  .nav-auth #profile-link,
+  .nav-auth #settings-link {
+    display: none !important;
+  }
   .main-nav .nav-link,
   .nav-auth .nav-link,
   .nav-auth button.nav-link {

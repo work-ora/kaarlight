@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#2563eb" />
   <title>My Profile - AfgJobs</title>
-  <meta name="description" content="View and manage your AfgJobs profile and job postings.">
+  <meta name="description" content="View and manage your AfgJobs profile, job postings, and account settings.">
   <meta name="robots" content="noindex,follow">
   <meta property="og:title" content="My Profile - AfgJobs">
-  <meta property="og:description" content="View and manage your AfgJobs profile and job postings.">
+  <meta property="og:description" content="View and manage your AfgJobs profile, job postings, and account settings.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://afgjobs.com/profile.html">
   <meta property="og:image" content="https://afgjobs.com/logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="My Profile - AfgJobs">
-  <meta name="twitter:description" content="View and manage your AfgJobs profile and job postings.">
+  <meta name="twitter:description" content="View and manage your AfgJobs profile, job postings, and account settings.">
   <meta name="twitter:image" content="https://afgjobs.com/logo.png">
   <link rel="icon" href="site-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
@@ -93,6 +93,7 @@
       <div class="profile-tabs">
         <button class="profile-tab active" data-tab="my-jobs">My Jobs</button>
         <button class="profile-tab" data-tab="profile-info">Profile Info</button>
+        <button class="profile-tab" data-tab="settings">Settings</button>
       </div>
 
       <div id="my-jobs" class="profile-tab-content active">
@@ -153,6 +154,39 @@
         </form>
       </div>
 
+      <div id="settings" class="profile-tab-content">
+        <h3>Account Settings</h3>
+
+        <div class="settings-section">
+          <h4>Password</h4>
+          <p>Change your account password</p>
+          <form id="password-form" class="settings-form">
+            <label for="current-password"><span class="required">*</span>Current Password</label>
+            <input type="password" id="current-password" name="currentPassword" required>
+            <small class="error" id="error-currentPassword" aria-live="polite"></small>
+
+            <label for="new-password"><span class="required">*</span>New Password</label>
+            <input type="password" id="new-password" name="newPassword" required minlength="6">
+            <small class="help-text">At least 6 characters</small>
+            <small class="error" id="error-newPassword" aria-live="polite"></small>
+
+            <label for="confirm-password"><span class="required">*</span>Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirmPassword" required minlength="6">
+            <small class="error" id="error-confirmPassword" aria-live="polite"></small>
+
+            <button type="submit" class="btn">Update Password</button>
+            <p id="password-msg" class="form-msg" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <div class="settings-section danger">
+          <h4>Danger Zone</h4>
+          <p>Delete your account and all associated data</p>
+          <button id="delete-account-btn" class="btn danger">Delete Account</button>
+          <p id="delete-msg" class="form-msg" aria-live="polite"></p>
+        </div>
+      </div>
+
     </section>
   </main>
 
@@ -174,6 +208,18 @@
         </div>
         <p id="modal-msg" class="form-msg" aria-live="polite"></p>
       </form>
+    </div>
+  </div>
+
+  <div id="delete-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3>Delete Account</h3>
+      <p>Are you sure? This cannot be undone. All your job postings and data will be permanently deleted.</p>
+      <div class="form-actions">
+        <button id="confirm-delete-btn" class="btn danger">Yes, Delete My Account</button>
+        <button class="modal-close btn outline">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -548,6 +594,59 @@
         updateWelcome(updated.fullname || 'User');
         window.dispatchEvent(new Event('afg-user-updated'));
         showMessage('profile-msg', 'Profile updated successfully.', 'success');
+      });
+
+      document.getElementById('password-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        clearError('error-currentPassword');
+        clearError('error-newPassword');
+        clearError('error-confirmPassword');
+
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        const users = readJson(KEYS.USERS, []);
+        const userRecord = users.find((u) => u.id === activeUser.id || u.email === activeUser.email);
+
+        const isValidCurrentPassword = await verifyPassword(userRecord, currentPassword);
+        if (!userRecord || !isValidCurrentPassword) {
+          setError('error-currentPassword', 'Current password is incorrect.');
+          return;
+        }
+
+        if (newPassword.length < 6) {
+          setError('error-newPassword', 'Password must be at least 6 characters.');
+          return;
+        }
+
+        if (newPassword !== confirmPassword) {
+          setError('error-confirmPassword', 'Passwords do not match.');
+          return;
+        }
+
+        userRecord.passwordHash = await hashPassword(newPassword);
+        delete userRecord.password;
+        writeJson(KEYS.USERS, users);
+        showMessage('password-msg', 'Password updated successfully.', 'success');
+        this.reset();
+      });
+
+      document.getElementById('delete-account-btn').addEventListener('click', function () {
+        document.getElementById('delete-modal').style.display = 'block';
+      });
+
+      document.getElementById('confirm-delete-btn').addEventListener('click', function () {
+        const users = readJson(KEYS.USERS, []).filter((u) => u.id !== activeUser.id && u.email !== activeUser.email);
+        writeJson(KEYS.USERS, users);
+
+        const jobs = readJson(KEYS.JOBS, []).filter((job) => job.posterId !== activeUser.id && job.postedBy !== activeUser.email);
+        writeJson(KEYS.JOBS, jobs);
+
+        localStorage.removeItem(KEYS.USER);
+        alert('Account deleted. Redirecting to home.');
+        window.location.href = 'index.html';
       });
 
       document.getElementById('edit-profile-btn').addEventListener('click', function () {
