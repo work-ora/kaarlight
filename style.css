@@ -57,6 +57,7 @@ body {
   color: var(--text);
   line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
 }
 
 
@@ -344,12 +345,14 @@ select:focus-visible {
   grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.92fr);
   gap: 1.75rem;
   align-items: stretch;
+  min-width: 0;
 }
 
 .hero-copy {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
 }
 
 .hero-eyebrow {
@@ -1833,6 +1836,9 @@ label {
     align-items: stretch;
     gap: 1rem;
   }
+  .hero-grid > * {
+    min-width: 0;
+  }
   .hero-eyebrow {
     align-self: center;
     margin-bottom: 0;
@@ -1895,6 +1901,7 @@ label {
   }
   .hero-proof,
   .hero-suggestions {
+    flex-wrap: wrap;
     justify-content: center;
     gap: 0.5rem;
   }
