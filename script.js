@@ -178,13 +178,13 @@ const CloudinaryUploader = {
             .slice(0, 80) || 'upload';
     },
 
-    async uploadFile(file, options = {}) {
+    async uploadFile(file, options = {}, onProgress) {
         const config = this.getConfig();
         if (!this.isConfigured()) {
             throw new Error(this.getSetupError());
         }
 
-        // Validate file with Utils methods
+        // Validate
         const validation = Utils.validateFileUpload(file);
         if (!validation.valid) {
             throw new Error(validation.error);
@@ -192,46 +192,64 @@ const CloudinaryUploader = {
 
         const maxSizeBytes = Number(config.maxFileSizeMb || 5) * 1024 * 1024;
         if (file?.size > maxSizeBytes) {
-            throw new Error(`File must be ${config.maxFileSizeMb || 5}MB or smaller.`);
+            throw new Error(`File must be ${config.maxFileSizeMb || 5}MB or smaller (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
         }
 
-        // Build folder path
         const folder = String(options.folder || 'afgjobs').trim().replace(/^\/+|\/+$/g, '');
         const tags = Array.isArray(options.tags) ? options.tags : [];
 
-        // Prepare FormData for Cloudinary
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', String(config.uploadPreset).trim());
         formData.append('folder', folder);
-        if (tags.length > 0) {
-            formData.append('tags', tags.join(','));
-        }
+        if (tags.length > 0) formData.append('tags', tags.join(','));
 
-        // Upload to Cloudinary
         const uploadUrl = `${config.apiBase}/${config.cloudName}/auto/upload`;
-        const response = await fetch(uploadUrl, {
-            method: 'POST',
-            body: formData
+
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            
+            // Progress
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable && onProgress) {
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    onProgress({ percent, loaded: event.loaded, total: event.total });
+                }
+            });
+
+            xhr.addEventListener('load', () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const payload = JSON.parse(xhr.responseText);
+                        const resourceType = options.resourceType || payload?.resource_type || (file?.type?.startsWith('video/') ? 'video' : 'image');
+                        resolve({
+                            url: payload?.secure_url || payload?.url || '',
+                            resourceType,
+                            publicId: payload?.public_id || `${folder}/${this.sanitizeFileName(file?.name)}`,
+                            format: payload?.format || file?.type || '',
+                            bytes: payload?.bytes || file?.size || 0
+                        });
+                    } catch {
+                        reject(new Error('Invalid response from Cloudinary'));
+                    }
+                } else {
+                    let errorMsg = 'Cloudinary upload failed';
+                    try {
+                        const payload = JSON.parse(xhr.responseText);
+                        errorMsg = payload?.error?.message || payload?.error?.http_code || payload?.error || errorMsg;
+                        if (payload?.bytes && payload?.max_bytes && payload.bytes > payload.max_bytes) {
+                            errorMsg = `File too large (${(payload.bytes/1024/1024).toFixed(1)}MB > ${payload.max_bytes/1024/1024}MB quota)`;
+                        }
+                    } catch {}
+                    reject(new Error(errorMsg));
+                }
+            });
+
+            xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
+            xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+            xhr.open('POST', uploadUrl);
+            xhr.send(formData);
         });
-
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            const errorMessage = payload?.error?.message || payload?.error || 'Cloudinary upload failed.';
-            throw new Error(errorMessage);
-        }
-
-        // Extract upload info from Cloudinary response
-        const resourceType = options.resourceType || payload?.resource_type || (file?.type?.startsWith('video/') ? 'video' : 'image');
-        const publicUrl = payload?.secure_url || payload?.url || '';
-
-        return {
-            url: publicUrl,
-            resourceType,
-            publicId: payload?.public_id || `${folder}/${safeName}`,
-            format: payload?.format || file?.type || '',
-            bytes: payload?.bytes || file?.size || 0
-        };
     }
 };
 
@@ -2035,6 +2053,11 @@ const FormHandler = {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
+            const submitBtn = document.getElementById('submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
             const formData = new FormData(form);
             const title = String(formData.get('title') || '').trim();
             const category = String(formData.get('category') || '').trim();
@@ -2050,67 +2073,81 @@ const FormHandler = {
             const existingJob = this.editingJob;
             const isEditing = Boolean(existingJob && existingJob.id);
 
+            // Validation (existing)
             if (!title || !category || !description || !location || !contact || !posterType) {
                 alert(LanguageManager.t('alert_required_fields'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
-
             if (!Number.isFinite(price) || price < 0) {
                 alert(LanguageManager.t('alert_invalid_price'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
-
             if (description.length < 20) {
                 alert(LanguageManager.t('alert_description_short'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
-
             if (!Utils.isEmail(contact) && !Utils.isPhone(contact)) {
                 alert(LanguageManager.t('alert_invalid_contact'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
-
             if (isOnline && !sampleLink) {
                 alert(LanguageManager.t('alert_sample_link_required'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
-
             if (sampleLink && !/^https?:\/\//i.test(sampleLink)) {
                 alert(LanguageManager.t('alert_sample_link_format'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
-
             if (portfolioLink && !/^https?:\/\//i.test(portfolioLink)) {
                 alert(LanguageManager.t('alert_portfolio_link_format'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
 
-            let media = this.mediaData;
-            let mediaType = this.mediaType;
-            if (isEditing && !this.mediaTouched) {
-                media = existingJob.media || '';
-                mediaType = existingJob.mediaType || '';
-            } else if (this.mediaFile) {
-                if (CloudinaryUploader.isConfigured()) {
-                    try {
-                        const resourceType = this.mediaFile.type.startsWith('video/') ? 'video' : 'image';
+            let media = null;
+            let mediaType = null;
+            let uploadSuccess = true;
+
+            // Handle media upload with progress
+            if (this.mediaFile) {
+                const progressEl = document.getElementById('upload-progress');
+                const statusEl = document.getElementById('upload-status');
+                const errorEl = document.getElementById('upload-error');
+                if (progressEl) progressEl.style.display = 'block';
+
+                try {
+                    if (CloudinaryUploader.isConfigured()) {
+                        const onUploadProgress = ({ percent, loaded, total }) => {
+                            const fillEl = document.querySelector('.progress-fill');
+                            const textEl = document.getElementById('progress-text');
+                            if (fillEl) fillEl.style.width = `${percent}%`;
+                            if (textEl) textEl.textContent = `${percent}%`;
+                            if (statusEl) statusEl.textContent = `Uploading... ${Math.round(loaded/1024)}KB / ${Math.round(total/1024)}KB`;
+                        };
                         const result = await CloudinaryUploader.uploadFile(this.mediaFile, {
                             folder: 'jobs',
-                            tags: ['job-media'],
-                            resourceType
-                        });
-                        if (result.url) {
-                            media = result.url;
-                            mediaType = this.mediaFile.type;
-                        }
-                    } catch {
-                        alert('Media upload failed. Please try again or choose a smaller file.');
-                        return;
-                    }
-                } else {
-                    const storageReady = await FirebaseStorageLoader.load();
-                    if (storageReady && window.firebase?.storage) {
-                        try {
+                            tags: ['job-media']
+                        }, onUploadProgress);
+                        media = result.url;
+                        mediaType = result.format || this.mediaFile.type;
+                        if (statusEl) statusEl.textContent = 'Upload complete ✅';
+                    } else {
+                        // Firebase fallback (existing logic)
+                        const storageReady = await FirebaseStorageLoader.load();
+                        if (storageReady && window.firebase?.storage) {
                             const storage = window.firebase.storage();
                             const safeName = String(this.mediaFile.name || 'upload')
                                 .replace(/[^a-zA-Z0-9._-]+/g, '_')
@@ -2121,12 +2158,37 @@ const FormHandler = {
                             await ref.put(this.mediaFile, { contentType: this.mediaFile.type });
                             media = await ref.getDownloadURL();
                             mediaType = this.mediaFile.type;
-                        } catch {
-                            alert('Media upload failed. Please try again or choose a smaller file.');
-                            return;
+                            if (statusEl) statusEl.textContent = 'Firebase upload complete ✅';
                         }
                     }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    uploadSuccess = false;
+                    const msg = error.message || 'Upload failed';
+                    if (errorEl) {
+                        errorEl.textContent = `Upload failed: ${msg}. Continuing without media.`;
+                        errorEl.style.display = 'block';
+                    }
+                    if (statusEl) statusEl.textContent = `Failed: ${msg}`;
                 }
+            }
+
+            // Use existing media for edits or skip if upload failed
+            if (isEditing && !this.mediaTouched) {
+                media = existingJob.media || null;
+                mediaType = existingJob.mediaType || null;
+            }
+
+            // If media file was selected but upload failed, don't save the job
+            if (this.mediaFile && !media) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                const msgEl = document.getElementById('form-msg');
+                if (msgEl) {
+                    msgEl.textContent = 'Failed to upload media. Please try again or post without media.';
+                    msgEl.className = 'form-msg error';
+                }
+                return;
             }
 
             const jobData = {
@@ -2141,8 +2203,7 @@ const FormHandler = {
                 isOnline,
                 sampleLink,
                 portfolioLink,
-                media,
-                mediaType,
+                ...(media ? { media, mediaType } : {}),
                 posterId: existingJob?.posterId || user.id,
                 postedBy: existingJob?.postedBy || user.email,
                 postedByName: existingJob?.postedByName || user.fullname
@@ -2161,14 +2222,10 @@ const FormHandler = {
             } else {
                 saveResult = await Storage.saveJobAsync(jobData);
             }
-            if (!saveResult.ok) {
-                if (msgEl) {
-                    msgEl.textContent = LanguageManager.t('post_fail');
-                    msgEl.className = 'form-msg error';
-                }
-                return;
-            }
 
+            // Reset UI
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
             form.reset();
             this.mediaData = null;
             this.mediaType = null;
@@ -2177,17 +2234,24 @@ const FormHandler = {
             this.editingJob = null;
             const previewContainer = document.getElementById('media-preview-container');
             if (previewContainer) previewContainer.style.display = 'none';
-            syncOnlineFields();
+            const progressEl = document.getElementById('upload-progress');
+            if (progressEl) progressEl.style.display = 'none';
 
-            if (msgEl) {
-                msgEl.textContent = isEditing ? 'Job updated successfully.' : LanguageManager.t('post_success');
-                msgEl.className = 'form-msg success';
+            if (saveResult?.ok) {
+                if (msgEl) {
+                    msgEl.textContent = isEditing ? 'Job updated successfully.' : LanguageManager.t('post_success');
+                    msgEl.className = 'form-msg success';
+                }
+                setTimeout(() => {
+                    localStorage.removeItem('editJobId');
+                    window.location.href = 'jobs.html';
+                }, 1500);
+            } else {
+                if (msgEl) {
+                    msgEl.textContent = LanguageManager.t('post_fail');
+                    msgEl.className = 'form-msg error';
+                }
             }
-
-            setTimeout(() => {
-                localStorage.removeItem('editJobId');
-                window.location.href = 'jobs.html';
-            }, 1200);
         });
     },
 
@@ -2274,33 +2338,96 @@ const FormHandler = {
         }
     },
 
-    handleFile(file) {
+    async handleFile(file) {
         if (!file) return;
 
+        const statusEl = document.getElementById('upload-status');
+        const errorEl = document.getElementById('upload-error');
+        if (errorEl) errorEl.style.display = 'none';
+
+        // Type check
         if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+            if (statusEl) statusEl.textContent = LanguageManager.t('alert_invalid_media_type');
             alert(LanguageManager.t('alert_invalid_media_type'));
             return;
         }
 
-        if (file.size > 2 * 1024 * 1024) {
-            alert(LanguageManager.t('alert_media_too_large'));
+        // Initial size check (before compress)
+        if (file.size > 10 * 1024 * 1024) {  // 10MB hard limit
+            const msg = 'File too large (max 10MB). Compress or choose smaller file.';
+            if (statusEl) statusEl.textContent = msg;
+            alert(msg);
             return;
         }
 
         this.mediaFile = file;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const result = event.target?.result;
-            if (!result) return;
-            this.mediaData = String(result);
-            this.mediaType = file.type;
-            this.mediaTouched = true;
-            this.setMediaPreview(this.mediaData, this.mediaType);
-            const info = document.getElementById('media-info');
-            if (info) info.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
-        };
+        this.mediaTouched = true;
 
-        reader.readAsDataURL(file);
+        try {
+            if (file.type.startsWith('image/')) {
+                // Compress/resize images
+                const compressed = await this.compressImage(file);
+                this.mediaFile = new File([compressed], file.name, { type: 'image/jpeg' });
+                if (statusEl) statusEl.textContent = `Compressed to ${Math.round(this.mediaFile.size / 1024)} KB`;
+            }
+
+            // Preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const result = event.target?.result;
+                if (result) {
+                    this.mediaData = String(result);
+                    this.mediaType = this.mediaFile.type;
+                    this.setMediaPreview(this.mediaData, this.mediaType);
+                    const info = document.getElementById('media-info');
+                    if (info) info.textContent = `${this.mediaFile.name} (${Math.round(this.mediaFile.size / 1024)} KB)`;
+                }
+            };
+            reader.readAsDataURL(this.mediaFile);
+        } catch (error) {
+            console.error('File processing failed:', error);
+            const msg = 'Failed to process file. Try another.';
+            if (statusEl) statusEl.textContent = msg;
+            alert(msg);
+        }
+    },
+
+    compressImage(file, maxWidth = 1200, quality = 0.8) {
+        return new Promise((resolve, reject) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = () => {
+                const { width, height } = img;
+                if (width <= maxWidth) {
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0);
+                } else {
+                    canvas.width = maxWidth;
+                    canvas.height = (height * maxWidth) / width;
+                    ctx.drawImage(img, 0, 0, maxWidth, canvas.height);
+                }
+
+                canvas.toBlob((blob) => {
+                    if (blob.size > file.size * 0.9) {
+                        // Retry lower quality if barely smaller
+                        const lowerQualityCanvas = document.createElement('canvas');
+                        const lowerCtx = lowerQualityCanvas.getContext('2d');
+                        lowerQualityCanvas.width = canvas.width;
+                        lowerQualityCanvas.height = canvas.height;
+                        lowerCtx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        lowerQualityCanvas.toBlob(resolve, 'image/jpeg', quality * 0.7);
+                    } else {
+                        resolve(blob);
+                    }
+                }, 'image/jpeg', quality);
+            };
+
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+        });
     }
 };
 

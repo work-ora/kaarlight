@@ -1,4 +1,4 @@
-<!doctype html>
+t<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -175,7 +175,19 @@
           </div>
           <p id="media-info" class="media-info"></p>
         </div>
-        <small class="error" id="error-mediaFile" aria-live="polite"></small>
+<small class="error" id="error-mediaFile" aria-live="polite"></small>
+
+        <!-- Upload Progress -->
+        <div id="upload-progress" class="upload-progress" style="display: none; margin: 1rem 0; padding: 1rem; background: var(--accent-bg); border-radius: var(--radius); border: 2px solid var(--border);">
+          <div class="progress-bar" style="background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 0.5rem;">
+            <div class="progress-fill" style="background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+            <span id="progress-text">0%</span>
+            <span id="upload-status"></span>
+          </div>
+        </div>
+        <div id="upload-error" class="error upload-error" style="display: none; margin: 0.5rem 0;"></div>
 
         <button type="submit" class="btn" id="submit-btn" data-i18n="submit_job">Submit Job</button>
         <button type="button" id="cancel-edit" class="btn outline" style="display:none" data-i18n="cancel">Cancel</button>
