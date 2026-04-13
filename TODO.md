@@ -1,28 +1,20 @@
-# Post-Job Image Upload Fix - TODO
+# Job Posting Image Upload Issue Fix - TODO
 
-## Approved Plan Steps (Proceed iteratively)
+## Approved Plan Steps:
+- [x] Step 1: Create TODO.md 
+- [x] Step 2: Added debug logging to CloudinaryUploader 
+- [x] Step 3: Removed media blocking - jobs always save now
+- [x] Step 4: Updated TODO progress
 
-### 1. ✅ Understand Issue [Done]
-- Silent failure when posting job with large images (>2-5MB).
-- Cloudinary rejects, generic alert (user misses it), no progress/feedback.
+**IN PROGRESS** ⏳ Step 5: Testing...
+- [ ] Run test server 
+- [ ] Try post-job.html with image 
+- [ ] Get console/network errors from user
 
-### 2. ✅ Update script.js [Done]
-- Image compress/resize ✅
-- Upload progress via XHR ✅
-- Detailed errors + status ✅
-- Form disable/spinner/UX ✅
-- Prevent saving job if media upload fails ✅
+**Remaining**:
+- [ ] Step 6: Fix based on logs (preset/config/retry)
+- [ ] Step 7: attempt_completion
 
-### 3. ✅ Update post-job.html [Done]
-- Progress bar + status + error UI ✅
+**Progress**: 40% - Logging ready. Test to reveal exact Cloudinary error!
 
-### 4. ✅ Test & Verify [Done]
-- Small image: Success + progress.
-- Large image: Compress + detailed fail message.
-- No image: Post succeeds.
-- If image selected but upload fails: Job not posted, error shown.
-
-### 5. ✅ Complete [Done]
-
-**Fixed syntax error in compressImage method placement.**
 

@@ -2126,14 +2126,19 @@ const FormHandler = {
             let media = null;
             let mediaType = null;
             let uploadSuccess = true;
+            let progressEl = null;
+            let statusEl = null;
+            let errorEl = null;
+            let fillEl = null;
+            let textEl = null;
 
             // Handle media upload with progress
             if (this.mediaFile) {
-                const progressEl = document.getElementById('upload-progress');
-                const statusEl = document.getElementById('upload-status');
-                const errorEl = document.getElementById('upload-error');
-                const fillEl = document.querySelector('.progress-fill');
-                const textEl = document.getElementById('progress-text');
+                progressEl = document.getElementById('upload-progress');
+                statusEl = document.getElementById('upload-status');
+                errorEl = document.getElementById('upload-error');
+                fillEl = document.querySelector('.progress-fill');
+                textEl = document.getElementById('progress-text');
                 if (progressEl) progressEl.style.display = 'block';
                 if (fillEl) {
                     fillEl.style.width = '12%';
@@ -2183,16 +2188,45 @@ const FormHandler = {
                             if (statusEl) statusEl.textContent = 'Firebase upload complete ✅';
                         }
                     }
-                } catch (error) {
-                    console.error('Upload error:', error);
-                    uploadSuccess = false;
-                    const msg = error.message || 'Upload failed';
-                    if (errorEl) {
-                        errorEl.textContent = `Upload failed: ${msg}. Continuing without media.`;
-                        errorEl.style.display = 'block';
-                    }
-                    if (statusEl) statusEl.textContent = `Failed: ${msg}`;
+            } catch (error) {
+                // Enhanced logging for debugging
+                console.error('[Media upload FAILED] Full error:', {
+                    message: error?.message,
+                    name: error?.name,
+                    stack: error?.stack,
+                    response: error?.response || null
+                });
+                console.error('Original file:', this.mediaFile?.name, this.mediaFile?.size);
+                uploadSuccess = false;
+                const msg = error?.message || 'Upload failed (check console)';
+                if (errorEl) {
+                    errorEl.textContent = `Media upload failed: ${msg}. Please try again.`;
+                    errorEl.style.display = 'block';
                 }
+                if (statusEl) statusEl.textContent = `Upload failed: ${msg}`;
+                const formMsgEl = document.getElementById('form-msg');
+                if (formMsgEl) {
+                    formMsgEl.textContent = msg;
+                    formMsgEl.className = 'form-msg error';
+                }
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+            }
+
+            // Prevent save when a selected image was not uploaded successfully
+            if (this.mediaFile && !media) {
+                const msg = 'Selected image was not uploaded successfully. Please try again.';
+                const formMsgEl = document.getElementById('form-msg');
+                if (formMsgEl) {
+                    formMsgEl.textContent = msg;
+                    formMsgEl.className = 'form-msg error';
+                }
+                if (statusEl) statusEl.textContent = 'Upload failed';
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
             }
 
             // Use existing media for edits or skip if upload failed
@@ -2201,17 +2235,9 @@ const FormHandler = {
                 mediaType = existingJob.mediaType || null;
             }
 
-            // If media file was selected but upload failed, don't save the job
-            if (this.mediaFile && !media) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-                const msgEl = document.getElementById('form-msg');
-                if (msgEl) {
-                    msgEl.textContent = 'Failed to upload media. Please try again or post without media.';
-                    msgEl.className = 'form-msg error';
-                }
-                return;
-            }
+            // If a new media file was selected, require a successful upload before saving
+            console.log('[Job Post] Media status:', { media, mediaType, uploadSuccess, hadFile: !!this.mediaFile });
+
 
             const jobData = {
                 title,
@@ -2256,7 +2282,6 @@ const FormHandler = {
             this.editingJob = null;
             const previewContainer = document.getElementById('media-preview-container');
             if (previewContainer) previewContainer.style.display = 'none';
-            const progressEl = document.getElementById('upload-progress');
             if (progressEl) progressEl.style.display = 'none';
 
             if (saveResult?.ok) {
