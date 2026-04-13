@@ -9,6 +9,6 @@
     cloudName: "dbbp3cusz", // Replace with your Cloudinary cloud name
     uploadPreset: "afgjobs_unsigned", // Create this in your Cloudinary dashboard
     apiBase: "https://api.cloudinary.com/v1_1",
-    maxFileSizeMb: 5 // Cloudinary free tier allows up to 100MB, we limit to 5MB
+    maxFileSizeMb: 3 // Cloudinary free tier allows up to 100MB, we limit to 3MB
   };
 })();

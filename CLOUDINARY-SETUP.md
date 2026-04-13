@@ -16,7 +16,7 @@ Your site has been migrated from **Cloudflare R2** to **Cloudinary** for image a
 3. Scroll to "Upload presets" section
 4. Click **Create upload preset**
 5. Fill in:
-   - **Name**: `afg_jobs_unsigned`
+   - **Name**: `afgjobs_unsigned`
    - **Signing mode**: **Unsigned** (IMPORTANT!)
 6. Click **Save**
 
@@ -38,7 +38,7 @@ Cloud Name: dbbp3cusz
 ```javascript
 window.CLOUDINARY_CONFIG = {
     cloudName: "dbbp3cusz",
-    uploadPreset: "afg_jobs_unsigned",
+    uploadPreset: "afgjobs_unsigned",
     apiBase: "https://api.cloudinary.com/v1_1",
     maxFileSizeMb: 5
 };
@@ -53,7 +53,7 @@ window.CLOUDINARY_CONFIG = {
 ## Troubleshooting
 
 ### "Upload Preset not found"
-→ Make sure you created the preset with exact name: `afg_jobs_unsigned`
+→ Make sure you created the preset with exact name: `afgjobs_unsigned`
 
 ### "Invalid upload preset"
 → Make sure the preset is set to **Unsigned** mode in Cloudinary dashboard

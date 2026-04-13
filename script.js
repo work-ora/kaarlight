@@ -220,9 +220,13 @@ const CloudinaryUploader = {
                 if (!onProgress) return;
                 const loaded = event.loaded || 0;
                 const total = event.total || 0;
-                    const percent = event.lengthComputable
-                        ? Math.round((loaded / total) * 100)
-                        : Math.max(12, Math.min(90, 10 + Math.round(loaded / 1024 / 2)));
+                const percent = event.lengthComputable
+                    ? Math.round((loaded / total) * 100)
+                    : Math.max(12, Math.min(90, 10 + Math.round(loaded / 1024 / 2)));
+                onProgress({ percent, loaded, total, lengthComputable: event.lengthComputable });
+            });
+
+            xhr.addEventListener('load', () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     try {
                         const payload = JSON.parse(xhr.responseText);

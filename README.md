@@ -27,7 +27,7 @@ Home, Jobs, Job Detail, Post Job, Authentication, Profile, Settings, About, Cont
 **Getting Started**
 1. Download or clone this repository.
 2. Review `firebase-init.js` and confirm the Firebase project values are correct for your deployment.
-3. Create a Cloudinary account (free at cloudinary.com) and set up an unsigned upload preset named `afg_jobs_unsigned`.
+3. Create a Cloudinary account (free at cloudinary.com) and set up an unsigned upload preset named `afgjobs_unsigned`.
 4. Update `cloudinary-config.js` with your Cloudinary Cloud Name and Upload Preset.
 5. Open `index.html` in your browser.
 6. Start browsing or posting jobs.
@@ -39,7 +39,7 @@ Home, Jobs, Job Detail, Post Job, Authentication, Profile, Settings, About, Cont
 
 **Cloudinary Setup**
 1. Sign up free at [cloudinary.com](https://cloudinary.com).
-2. Go to Dashboard → Settings → Upload and create an unsigned upload preset named `afg_jobs_unsigned`.
+2. Go to Dashboard → Settings → Upload and create an unsigned upload preset named `afgjobs_unsigned`.
 3. Copy your Cloud Name and paste it into `cloudinary-config.js`.
 4. No backend Worker needed - uploads go directly from browser to Cloudinary!
 
