@@ -151,7 +151,15 @@ const CloudinaryUploader = {
 
     isPlaceholder(value) {
         const normalized = String(value || '').trim().toUpperCase();
-        return !normalized || normalized.includes('UNSIGNED') || normalized.includes('PLACEHOLDER');
+        if (!normalized) return true;
+        return [
+            'YOUR_CLOUD_NAME',
+            'YOUR_UPLOAD_PRESET',
+            'CLOUD_NAME',
+            'UPLOAD_PRESET',
+            'PLACEHOLDER',
+            'REPLACE_ME'
+        ].includes(normalized);
     },
 
     isConfigured() {
