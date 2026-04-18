@@ -54,8 +54,11 @@ body.dark .newsletter-section {
 
 body.dark .momentum-point,
 body.dark .testimonial-card,
+body.dark .assurance-card,
 body.dark .process-card,
-body.dark .trust-card {
+body.dark .trust-card,
+body.dark .workflow-card,
+body.dark .safety-card {
   background: rgba(15, 23, 42, 0.72);
   border-color: rgba(96, 165, 250, 0.16);
 }
@@ -1215,6 +1218,47 @@ label {
   margin-top: 3rem;
 }
 
+.assurance-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 3rem;
+}
+
+.assurance-card {
+  padding: 1.35rem;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.9));
+  box-shadow: var(--shadow-sm);
+}
+
+.assurance-label,
+.workflow-step {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
+}
+
+.assurance-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.65rem;
+}
+
+.assurance-card p {
+  color: var(--muted);
+  margin: 0;
+}
+
 .testimonials-header {
   margin-bottom: 1rem;
 }
@@ -1287,6 +1331,39 @@ label {
 .trust-section {
   margin: 4rem 0;
   text-align: center;
+}
+
+.workflow-section,
+.safety-section {
+  margin: 4rem 0;
+}
+
+.workflow-grid,
+.safety-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.workflow-card,
+.safety-card {
+  padding: 1.5rem;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.workflow-card h4,
+.safety-card h4 {
+  font-size: 1.15rem;
+  margin-bottom: 0.65rem;
+}
+
+.workflow-card p,
+.safety-card p {
+  color: var(--muted);
+  margin: 0;
 }
 
 .trust-section h3 {
@@ -3159,7 +3236,9 @@ label {
   }
   .feedback-section,
   .how-it-works,
+  .workflow-section,
   .trust-section,
+  .safety-section,
   .faq-section,
   .newsletter-section,
   .site-footer,
@@ -3168,11 +3247,28 @@ label {
   }
   .feedback-section,
   .how-it-works,
+  .workflow-section,
   .trust-section,
+  .safety-section,
   .faq-section,
   .newsletter-section {
     margin: 1.5rem 0;
     padding: 1.2rem;
+    border-radius: 18px;
+  }
+  .assurance-strip,
+  .workflow-grid,
+  .safety-grid,
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+  .assurance-strip {
+    margin: 1rem 0 1.5rem;
+  }
+  .assurance-card,
+  .workflow-card,
+  .safety-card {
+    padding: 1.15rem;
     border-radius: 18px;
   }
   .featured {
@@ -3296,7 +3392,9 @@ label {
   .newsletter-section h3,
   .faq-section h3,
   .how-it-works h3,
-  .trust-section h3 {
+  .workflow-section h3,
+  .trust-section h3,
+  .safety-section h3 {
     line-height: 1.2;
     text-wrap: balance;
   }

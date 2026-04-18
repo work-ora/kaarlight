@@ -1257,7 +1257,7 @@ const LanguageManager = {
             faq_q8: 'What should I do if I find suspicious content?',
             faq_a8: 'Do not engage. Capture the listing details and report it through the Contact page.',
             faq_q9: 'Why do I not see my jobs on another device?',
-            faq_a9: 'The current version stores most data in local browser storage, so data may not sync across devices.',
+            faq_a9: 'Listings try to load from the cloud when available, with local browser storage as a fallback. If something is missing on another device, sign in again or check your connection.',
             faq_q10: 'How can I contact support?',
             faq_a10: 'Use the Contact page to send your message and include as much detail as possible.',
             faq_action_contact: 'Contact Support',
@@ -1278,7 +1278,7 @@ const LanguageManager = {
             privacy_use_item3: 'To store feedback and newsletter subscriptions.',
             privacy_use_item4: 'To improve site usability and user experience.',
             privacy_storage_title: '3. Data Storage',
-            privacy_storage_body: 'In the current version of this site, form data and account data are stored in your browser local storage on your own device. This means data is not synced across devices by default.',
+            privacy_storage_body: 'AfgJobs uses a hybrid storage approach. Listings and some account-related features may load from cloud services when available, while browser local storage is still used for preferences, local fallbacks, and some form data on your device.',
             privacy_sharing_title: '4. Data Sharing',
             privacy_sharing_body: 'AfgJobs does not sell personal data. We only show data you choose to publish in job posts (such as contact details).',
             privacy_security_title: '5. Security Notice',
@@ -1570,7 +1570,7 @@ const LanguageManager = {
             faq_q8: 'اگر محتوای مشکوک دیدم چه کنم؟',
             faq_a8: 'درگیر نشوید. جزئیات آگهی را ثبت کنید و از صفحه تماس گزارش دهید.',
             faq_q9: 'چرا آگهی‌های من در دستگاه دیگر دیده نمی‌شود؟',
-            faq_a9: 'نسخه فعلی بیشتر داده‌ها را در ذخیره‌سازی مرورگر نگه می‌دارد و ممکن است بین دستگاه‌ها همگام نشود.',
+            faq_a9: 'آگهی‌ها در صورت دسترس بودن تلاش می‌کنند از فضای ابری بارگیری شوند و ذخیره‌سازی مرورگر نقش پشتیبان را دارد. اگر چیزی در دستگاه دیگر دیده نمی‌شود، دوباره وارد شوید یا اتصال خود را بررسی کنید.',
             faq_q10: 'چگونه با پشتیبانی تماس بگیرم؟',
             faq_a10: 'از صفحه تماس پیام خود را ارسال کنید و تا حد امکان جزئیات را بنویسید.',
             faq_action_contact: 'تماس با پشتیبانی',
@@ -1591,7 +1591,7 @@ const LanguageManager = {
             privacy_use_item3: 'برای ذخیره بازخورد و عضویت خبرنامه.',
             privacy_use_item4: 'برای بهبود تجربه و کارایی سایت.',
             privacy_storage_title: '۳. ذخیره‌سازی داده',
-            privacy_storage_body: 'در نسخه فعلی، داده‌های فرم و حساب در ذخیره‌سازی مرورگر شما روی همان دستگاه نگهداری می‌شود؛ بنابراین به‌صورت پیش‌فرض بین دستگاه‌ها همگام نیست.',
+            privacy_storage_body: 'AfgJobs از روش ترکیبی ذخیره‌سازی استفاده می‌کند. آگهی‌ها و برخی قابلیت‌های مرتبط با حساب در صورت دسترس بودن ممکن است از سرویس‌های ابری بارگیری شوند و هم‌زمان ذخیره‌سازی مرورگر برای ترجیحات، حالت پشتیبان و بعضی داده‌های فرم روی دستگاه شما استفاده می‌شود.',
             privacy_sharing_title: '۴. اشتراک‌گذاری داده',
             privacy_sharing_body: 'AfgJobs داده شخصی را نمی‌فروشد. فقط اطلاعاتی را نشان می‌دهیم که خودتان در آگهی عمومی منتشر می‌کنید (مانند اطلاعات تماس).',
             privacy_security_title: '۵. اطلاعیه امنیتی',
@@ -3055,14 +3055,17 @@ const HomePageManager = {
         const categoryTags = document.getElementById('hero-category-tags');
         const citySummary = document.getElementById('hero-city-summary');
         const popularCategories = document.getElementById('popular-category-chips');
+        const syncStatus = document.getElementById('ops-sync-status');
+        const lastUpdate = document.getElementById('ops-last-update');
 
-        if (!snapshotJobs && !snapshotCategories && !snapshotCities && !categoryTags && !citySummary && !popularCategories) {
+        if (!snapshotJobs && !snapshotCategories && !snapshotCities && !categoryTags && !citySummary && !popularCategories && !syncStatus && !lastUpdate) {
             return;
         }
 
         const jobs = await Storage.getAllJobsAsync();
         const categoryCounts = new Map();
         const cityCounts = new Map();
+        let newestTimestamp = 0;
 
         jobs.forEach((job) => {
             const category = String(job?.category || '').trim();
@@ -3074,6 +3077,8 @@ const HomePageManager = {
             if (city) {
                 cityCounts.set(city, (cityCounts.get(city) || 0) + 1);
             }
+
+            newestTimestamp = Math.max(newestTimestamp, Utils.getJobTimestamp(job));
         });
 
         const topCategories = Array.from(categoryCounts.entries())
@@ -3109,6 +3114,33 @@ const HomePageManager = {
             citySummary.textContent = topCities.length
                 ? `${topCities.map(([city, count]) => `${city} (${count})`).join(', ')} are currently generating the most activity.`
                 : 'Add a few listings with city names to show local hiring momentum here.';
+        }
+
+        if (syncStatus) {
+            syncStatus.textContent = FirebaseStore.enabled
+                ? 'Live listings are syncing from the shared job feed'
+                : 'Local fallback mode is active for listings on this device';
+        }
+
+        if (lastUpdate) {
+            if (jobs.length === 0) {
+                lastUpdate.textContent = FirebaseStore.enabled
+                    ? 'The shared feed is connected. Publish the first listing to show fresh marketplace activity here.'
+                    : 'Once listings are posted, this homepage will surface the latest activity from the current device or available cloud feed.';
+            } else if (newestTimestamp > 0) {
+                const formatted = new Date(newestTimestamp).toLocaleString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                lastUpdate.textContent = FirebaseStore.enabled
+                    ? `Marketplace snapshot refreshed from active listings. Latest visible post date: ${formatted}.`
+                    : `Showing active listings saved on this device. Latest visible post date: ${formatted}.`;
+            } else {
+                lastUpdate.textContent = FirebaseStore.enabled
+                    ? 'Marketplace snapshot refreshed from active listings.'
+                    : 'Showing the latest listings available on this device.';
+            }
         }
 
         if (popularCategories) {
