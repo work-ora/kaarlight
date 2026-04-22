@@ -1,5 +1,5 @@
-# AfgJobs - Robots configuration file
+# Workora - Robots configuration file
 User-agent: *
 Allow: /
 
-Sitemap: https://afgjobs.com/sitemap.xml
+Sitemap: https://workora.github.io/workora/sitemap.xml

@@ -1,6 +1,6 @@
-# AfgJobs - Fast Local Jobs for Afghans
+# Workora - Fast Local Jobs for Afghans
 
-AfgJobs is a fast, simple job board for Afghan communities, built to help people post local jobs and find nearby freelance or full-time work in minutes.
+Workora is a fast, simple job board for Afghan communities, built to help people post local jobs and find nearby freelance or full-time work in minutes.
 
 **Features**
 - Job listings with search and filters (category, location, type)
