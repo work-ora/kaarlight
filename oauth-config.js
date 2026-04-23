@@ -1,4 +1,4 @@
-window.AFG_OAUTH_CONFIG = {
+window.KAARLIGHT_OAUTH_CONFIG = {
   apiKey: 'AIzaSyDRbPwm5CPavdvkXiy6SKKzEQpd2oh_ths',
   authDomain: 'afgjobs-cef9f.firebaseapp.com',
   projectId: 'afgjobs-cef9f',
@@ -6,3 +6,5 @@ window.AFG_OAUTH_CONFIG = {
   messagingSenderId: '21300041233',
   storageBucket: 'afgjobs-cef9f.firebasestorage.app'
 };
+
+window.AFG_OAUTH_CONFIG = window.KAARLIGHT_OAUTH_CONFIG;

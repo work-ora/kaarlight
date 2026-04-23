@@ -7,7 +7,7 @@ The `.htaccess` file configuration needs to be deployed to your web server based
 
 ## Apache (Recommended - Uses `.htaccess`)
 
-**Status**: ✅ Ready to deploy  
+**Status**: âœ… Ready to deploy  
 **File**: `.htaccess` (in root directory)
 
 ### Steps:
@@ -18,7 +18,7 @@ The `.htaccess` file configuration needs to be deployed to your web server based
 
 ### Verify:
 ```bash
-curl -I https://afgjobs.com/
+curl -I https://kaarlight.github.io/kaarlight/
 # Look for headers like:
 # Content-Security-Policy: ...
 # X-Content-Type-Options: nosniff
@@ -28,13 +28,13 @@ curl -I https://afgjobs.com/
 
 ## Nginx
 
-**Status**: ⚠️ Manual conversion needed
+**Status**: âš ï¸ Manual conversion needed
 
 ### Create/Update `nginx.conf`:
 ```nginx
 server {
     listen 443 ssl http2;
-    server_name afgjobs.com;
+    server_name kaarlight.github.io;
 
     # SSL configuration (required)
     ssl_certificate /path/to/cert.pem;
@@ -61,7 +61,7 @@ server {
     }
 
     # Root directory
-    root /var/www/afgjobs;
+    root /var/www/kaarlight;
     index index.html;
 
     # Try file or directory, else 404
@@ -79,7 +79,7 @@ sudo systemctl reload nginx
 
 ## Microsoft IIS (Windows)
 
-**Status**: ⚠️ Manual conversion needed
+**Status**: âš ï¸ Manual conversion needed
 
 ### Via IIS Manager:
 
@@ -124,7 +124,7 @@ If your site is behind Cloudflare, you can set headers there:
 
 1. Log in to **Cloudflare Dashboard**
 2. Select your site
-3. Go to **Rules** → **Transform Rules** → **Modify Response Header**
+3. Go to **Rules** â†’ **Transform Rules** â†’ **Modify Response Header**
 4. Create a rule to add each security header
 
 ### Example Rule:
@@ -151,7 +151,7 @@ After deploying headers, verify they're active:
 ### Command Line:
 ```bash
 # Check all headers
-curl -I https://afgjobs.com/
+curl -I https://kaarlight.github.io/kaarlight/
 
 # Should see output like:
 # HTTP/2 200
@@ -200,3 +200,4 @@ script-src 'self' https://www.gstatic.com https://www.googletagmanager.com https
 4. **Update** CSP as needed for new resources
 
 **Questions?** Check the main `SECURITY.md` file for more details.
+

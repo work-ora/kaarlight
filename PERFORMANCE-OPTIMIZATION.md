@@ -1,36 +1,36 @@
-# AfgJobs Performance Optimization Guide
+# Kaarlight Performance Optimization Guide
 
-## ✅ Optimizations Completed
+## âœ… Optimizations Completed
 
 ### 1. **CSS Minification**
 - **Original**: `style.css` = 36.03 KB
 - **Minified**: `style.min.css` = 26.45 KB
 - **Savings**: 27% reduction (9.58 KB)
-- **Status**: ✅ Complete - Update all HTML files to link `style.min.css`
+- **Status**: âœ… Complete - Update all HTML files to link `style.min.css`
 
 ### 2. **Server Compression (.htaccess)**
-- ✅ GZIP compression enabled for all text/CSS/JS/JSON files
-- ✅ Browser caching headers configured:
+- âœ… GZIP compression enabled for all text/CSS/JS/JSON files
+- âœ… Browser caching headers configured:
   - **HTML**: 1 day cache (allows updates)
   - **CSS/JS**: 2 weeks cache (immutable)
   - **Images**: 1 month cache
   - **Fonts**: 1 month cache
-- ✅ ETags enabled for efficient validation
-- ✅ Security headers preserved
+- âœ… ETags enabled for efficient validation
+- âœ… Security headers preserved
 
 ### 3. **Script Loading Optimization**
-- ✅ `script.js` already uses `defer` attribute (loads after page renders)
-- ✅ No render-blocking scripts
+- âœ… `script.js` already uses `defer` attribute (loads after page renders)
+- âœ… No render-blocking scripts
 
 ### 4. **Resource Hints Added**
-- ✅ DNS prefetch for Google services (faster external CDN connection)
-- ✅ Preconnect hints for repeated domains
+- âœ… DNS prefetch for Google services (faster external CDN connection)
+- âœ… Preconnect hints for repeated domains
 
 ---
 
-## ⚠️ Critical Next Steps (You Must Do These)
+## âš ï¸ Critical Next Steps (You Must Do These)
 
-### **URGENT: Image Optimization** 🖼️
+### **URGENT: Image Optimization** ðŸ–¼ï¸
 **Logo.png is 570.7 KB** - This is HUGE and killing performance!
 
 **Option 1: Convert to WebP (Recommended)**
@@ -54,13 +54,13 @@ Update your HTML to serve WebP with PNG fallback:
 ```html
 <picture>
   <source srcset="logo.webp" type="image/webp">
-  <img src="logo.png" alt="AfgJobs Logo" loading="lazy">
+  <img src="logo.png" alt="Kaarlight Logo" loading="lazy">
 </picture>
 ```
 
 ---
 
-## 📊 Performance Impact Summary
+## ðŸ“Š Performance Impact Summary
 
 ### **Before Optimization**
 | File | Size |
@@ -83,7 +83,7 @@ Update your HTML to serve WebP with PNG fallback:
 
 ---
 
-## 🚀 Additional Optimizations Available
+## ðŸš€ Additional Optimizations Available
 
 ### **1. JavaScript Minification (High Priority)**
 Currently: 131.34 KB unminified
@@ -125,11 +125,11 @@ Add to `<head>`:
 
 ---
 
-## 📋 Implementation Checklist
+## ðŸ“‹ Implementation Checklist
 
-- [ ] **CRITICAL**: Optimize logo.png → WebP (570 KB → 150 KB)
+- [ ] **CRITICAL**: Optimize logo.png â†’ WebP (570 KB â†’ 150 KB)
 - [ ] Update all HTML files to use `style.min.css` instead of `style.css`
-- [ ] Minify `script.js` (131 KB → ~50 KB)
+- [ ] Minify `script.js` (131 KB â†’ ~50 KB)
 - [ ] Test on slow 3G network (Chrome DevTools)
 - [ ] Run Lighthouse audit (target: 90+ score)
 - [ ] Convert other PNG/JPEG images to WebP
@@ -138,7 +138,7 @@ Add to `<head>`:
 
 ---
 
-## 🧪 Testing Performance
+## ðŸ§ª Testing Performance
 
 ### **Using Chrome DevTools**
 1. Open DevTools (F12)
@@ -159,7 +159,7 @@ Add to `<head>`:
 
 ---
 
-## 🎯 Performance Goals
+## ðŸŽ¯ Performance Goals
 
 | Metric | Current | Target |
 |--------|---------|--------|
@@ -171,13 +171,13 @@ Add to `<head>`:
 
 ---
 
-## 📝 Implementation Notes
+## ðŸ“ Implementation Notes
 
 All `.htaccess` rules are already configured for:
-- ✅ GZIP compression (reduces text files by 60-80%)
-- ✅ Browser caching (reduces repeat visits by 90%)
-- ✅ ETag validation (efficient cache validation)
-- ✅ Security headers (maintained)
+- âœ… GZIP compression (reduces text files by 60-80%)
+- âœ… Browser caching (reduces repeat visits by 90%)
+- âœ… ETag validation (efficient cache validation)
+- âœ… Security headers (maintained)
 
 ### **How to Deploy**
 1. Replace `style.css` link with `style.min.css` in all HTML files
@@ -188,11 +188,11 @@ All `.htaccess` rules are already configured for:
 
 ---
 
-## 💡 Pro Tips
+## ðŸ’¡ Pro Tips
 
 1. **Cache Busting**: When you update CSS/JS, rename to `style.v2.css` so users get fresh version
 2. **Monitor Regularly**: Set up Google Analytics Real User Metrics
-3. **Test on Slow Networks**: Chrome DevTools → Network tab → Throttle to "Slow 3G"
+3. **Test on Slow Networks**: Chrome DevTools â†’ Network tab â†’ Throttle to "Slow 3G"
 4. **Measure Real Users**: Add Google Analytics page load metrics
 5. **Set Alerts**: Monitor performance regressions using Lighthouse CI
 
@@ -200,3 +200,4 @@ All `.htaccess` rules are already configured for:
 
 **Last Updated**: April 4, 2026  
 **Estimated Load Time Improvement**: 50-75% faster with all optimizations
+

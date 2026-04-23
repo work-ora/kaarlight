@@ -5,7 +5,7 @@ REM Run this in PowerShell if on Windows
 cd /d "%~dp0"
 
 echo ========================================
-echo  AfgJobs Performance Optimization Script
+echo  Kaarlight Performance Optimization Script
 echo ========================================
 echo.
 
@@ -23,7 +23,7 @@ for %%F in (*.html) do (
 )
 
 echo.
-echo ✓ All HTML files updated!
+echo Done - All HTML files updated!
 echo.
 echo Next steps:
 echo 1. Convert logo.png to WebP format (saves 70%% of size)
@@ -31,3 +31,4 @@ echo 2. Minify script.js
 echo 3. Test site performance with Lighthouse
 echo.
 pause
+

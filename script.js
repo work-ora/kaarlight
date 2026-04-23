@@ -203,7 +203,7 @@ const CloudinaryUploader = {
             throw new Error(`File must be ${config.maxFileSizeMb || 5}MB or smaller (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
         }
 
-        const folder = String(options.folder || 'afgjobs').trim().replace(/^\/+|\/+$/g, '');
+        const folder = String(options.folder || 'kaarlight').trim().replace(/^\/+|\/+$/g, '');
         const tags = Array.isArray(options.tags) ? options.tags : [];
 
         const formData = new FormData();

@@ -1,73 +1,59 @@
 # Cloudinary Setup Guide
 
-Your site has been migrated from **Cloudflare R2** to **Cloudinary** for image and video uploads.
+Your site uses **Cloudinary** for image and video uploads.
 
 ## What Changed
-- ✅ Removed Cloudflare R2 Worker dependency
-- ✅ Direct browser uploads to Cloudinary (simpler, faster)
-- ✅ Free tier supports up to 100MB files (we limit to 5MB)
-- ✅ No more backend uploads needed
+- Removed the old Cloudflare R2 Worker dependency
+- Uploads now go directly from the browser to Cloudinary
+- Media stays in Cloudinary while app data stays lightweight
 
-## ⚙️ Complete Setup in 3 Steps
+## Complete Setup
 
-### Step 1: Create an Unsigned Upload Preset
-1. Go to [Cloudinary Dashboard](https://cloudinary.com/console/dashboard)
-2. Navigate to **Settings** → **Upload** tab
-3. Scroll to "Upload presets" section
-4. Click **Create upload preset**
-5. Fill in:
-   - **Name**: `afgjobs_unsigned`
-   - **Signing mode**: **Unsigned** (IMPORTANT!)
-6. Click **Save**
+### Step 1: Create an unsigned upload preset
+1. Go to [Cloudinary Dashboard](https://cloudinary.com/console/dashboard).
+2. Open `Settings -> Upload`.
+3. Scroll to the `Upload presets` section.
+4. Click `Create upload preset`.
+5. Set:
+   - `Name`: `kaarlight_unsigned`
+   - `Signing mode`: `Unsigned`
+6. Save the preset.
 
-### Step 2: Your Cloud Name
-Your Cloud Name is already in `cloudinary-config.js`:
+### Step 2: Confirm your Cloud Name
+Your current Cloud Name in `cloudinary-config.js` is:
+
+```text
+dbbp3cusz
 ```
-Cloud Name: dbbp3cusz
-```
 
-### Step 3: Test Upload
-1. Go to **Profile** (Click user menu → "My Profile")
-2. Click "Upload Photo" button
-3. Select an image file
-4. Should upload directly without any backend!
+### Step 3: Test an upload
+1. Open the profile page.
+2. Upload a profile image.
+3. Post a job with media if needed.
+4. Confirm the file uploads successfully and the returned URL is saved.
 
-## Configuration File
-**Location**: `cloudinary-config.js`
+## Config Example
 
 ```javascript
 window.CLOUDINARY_CONFIG = {
-    cloudName: "dbbp3cusz",
-    uploadPreset: "afgjobs_unsigned",
-    apiBase: "https://api.cloudinary.com/v1_1",
-    maxFileSizeMb: 5
+  cloudName: "dbbp3cusz",
+  uploadPreset: "kaarlight_unsigned",
+  apiBase: "https://api.cloudinary.com/v1_1",
+  maxFileSizeMb: 3
 };
 ```
 
-## Files Modified
-- `cloudinary-config.js` - NEW (Cloudinary settings)
-- `script.js` - Added `CloudinaryUploader` object
-- `profile.html` - Updated to use Cloudinary
-- `post-job.html` - Updated to use Cloudinary
-
 ## Troubleshooting
 
-### "Upload Preset not found"
-→ Make sure you created the preset with exact name: `afgjobs_unsigned`
+### Upload preset not found
+Make sure the preset name is exactly `kaarlight_unsigned`.
 
-### "Invalid upload preset"
-→ Make sure the preset is set to **Unsigned** mode in Cloudinary dashboard
+### Invalid upload preset
+Make sure the preset is set to `Unsigned` in Cloudinary.
 
-### File upload fails silently
-→ Open browser DevTools (F12) → Console and check for error messages
+### Upload fails silently
+Open browser DevTools and inspect the Console and Network tabs.
 
-## Features
-✅ Job media uploads (images & videos)
-✅ Profile photo uploads
-✅ Automatic image optimization
-✅ CloudFront CDN delivery
-✅ Free tier (~25GB/month)
-
-## Need Help?
+## Need Help
 - [Cloudinary Docs](https://cloudinary.com/documentation)
 - [Upload Presets](https://cloudinary.com/documentation/upload_presets)

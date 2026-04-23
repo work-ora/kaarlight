@@ -27,8 +27,8 @@ Home, Jobs, Job Detail, Post Job, Authentication, Profile, Settings, About, Cont
 **Getting Started**
 1. Download or clone this repository.
 2. Review `firebase-init.js` and confirm the Firebase project values are correct for your deployment.
-3. Create a Cloudinary account (free at cloudinary.com) and set up an unsigned upload preset named `afgjobs_unsigned`.
-4. Update `cloudinary-config.js` with your Cloudinary Cloud Name and Upload Preset.
+3. Create a Cloudinary account and an unsigned upload preset named `kaarlight_unsigned`.
+4. Update `cloudinary-config.js` with your Cloud Name and upload preset if needed.
 5. Open `index.html` in your browser.
 6. Start browsing or posting jobs.
 
@@ -38,19 +38,19 @@ Home, Jobs, Job Detail, Post Job, Authentication, Profile, Settings, About, Cont
 - Firebase stays focused on lightweight application data instead of large media files.
 
 **Cloudinary Setup**
-1. Sign up free at [cloudinary.com](https://cloudinary.com).
-2. Go to Dashboard → Settings → Upload and create an unsigned upload preset named `afgjobs_unsigned`.
-3. Copy your Cloud Name and paste it into `cloudinary-config.js`.
-4. No backend Worker needed - uploads go directly from browser to Cloudinary!
+1. Sign up at [cloudinary.com](https://cloudinary.com).
+2. Go to `Dashboard -> Settings -> Upload`.
+3. Create an unsigned upload preset named `kaarlight_unsigned`.
+4. Copy your Cloud Name into `cloudinary-config.js`.
 
 **Note**
-This project still includes local/session storage behavior for some client-side flows. For production use, keep Firebase rules locked down and protect the Worker with auth or rate limits before accepting public uploads.
+This project still includes local/session storage behavior for some client-side flows. For production use, keep Firebase rules locked down and protect public-facing services with proper auth and rate limits.
 
 **Security**
 This project includes security best practices:
 - Content Security Policy (CSP) headers to prevent XSS attacks
 - Input validation and sanitization for all user data
-- File upload validation (type & size checks)
+- File upload validation (type and size checks)
 - MIME-type sniffing protection
-- Clickjacking prevention (X-Frame-Options)
-- See [SECURITY.md](./SECURITY.md) and [SECURITY-HEADERS-DEPLOYMENT.md](./SECURITY-HEADERS-DEPLOYMENT.md) for details.
+- Clickjacking prevention (`X-Frame-Options`)
+- See [SECURITY.md](./SECURITY.md) and [SECURITY-HEADERS-DEPLOYMENT.md](./SECURITY-HEADERS-DEPLOYMENT.md) for details

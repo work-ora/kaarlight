@@ -21,8 +21,8 @@
   <meta name="twitter:image" content="https://kaarlight.github.io/kaarlight/site-icon.svg">
   <link rel="icon" href="site-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/site-icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="site-icon.svg">
   <link rel="canonical" href="https://kaarlight.github.io/kaarlight/auth.html">
   <style>
     .auth-container {
@@ -489,17 +489,24 @@
     }
 
     function socialEmail(provider) {
-      return `${provider.toLowerCase()}.${Date.now()}@social.Kaarlight.local`;
+      return `${provider.toLowerCase()}.${Date.now()}@social.kaarlight.local`;
     }
 
     function getOAuthConfig() {
       // Set this in a separate script before auth.html runs:
-      // window.AFG_OAUTH_CONFIG = { apiKey, authDomain, projectId, appId, messagingSenderId, storageBucket };
+      // window.KAARLIGHT_OAUTH_CONFIG = { apiKey, authDomain, projectId, appId, messagingSenderId, storageBucket };
+      if (window.KAARLIGHT_OAUTH_CONFIG && typeof window.KAARLIGHT_OAUTH_CONFIG === 'object') {
+        return window.KAARLIGHT_OAUTH_CONFIG;
+      }
       if (window.AFG_OAUTH_CONFIG && typeof window.AFG_OAUTH_CONFIG === 'object') {
         return window.AFG_OAUTH_CONFIG;
       }
       try {
-        const fromStorage = JSON.parse(localStorage.getItem('afg_oauth_config') || 'null');
+        const fromStorage = JSON.parse(
+          localStorage.getItem('kaarlight_oauth_config')
+          || localStorage.getItem('afg_oauth_config')
+          || 'null'
+        );
         return fromStorage && typeof fromStorage === 'object' ? fromStorage : null;
       } catch {
         return null;
@@ -638,7 +645,7 @@
           user.oauthProvider = providerName;
           user.oauthUid = authUser.uid;
           if (!user.fullname && authUser.displayName) user.fullname = authUser.displayName;
-          if ((!user.email || user.email.endsWith('@social.Kaarlight.local')) && authUser.email) user.email = authUser.email;
+          if ((!user.email || user.email.endsWith('@social.kaarlight.local')) && authUser.email) user.email = authUser.email;
           if (!user.phone && authUser.phoneNumber) user.phone = authUser.phoneNumber;
           if (!user.avatar && authUser.photoURL) user.avatar = authUser.photoURL;
         }
@@ -882,7 +889,7 @@
           user.oauthProvider = providerName;
           user.oauthUid = authUser.uid;
           if (!user.fullname && authUser.displayName) user.fullname = authUser.displayName;
-          if ((!user.email || user.email.endsWith('@social.Kaarlight.local')) && authUser.email) user.email = authUser.email;
+          if ((!user.email || user.email.endsWith('@social.kaarlight.local')) && authUser.email) user.email = authUser.email;
           if (!user.phone && authUser.phoneNumber) user.phone = authUser.phoneNumber;
           if (!user.avatar && authUser.photoURL) user.avatar = authUser.photoURL;
         }
@@ -932,6 +939,7 @@
   </nav>
 </body>
 </html>
+
 
 
 

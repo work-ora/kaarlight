@@ -7,7 +7,7 @@
 (function () {
   window.CLOUDINARY_CONFIG = {
     cloudName: "dbbp3cusz", // Replace with your Cloudinary cloud name
-    uploadPreset: "afgjobs_unsigned", // Create this in your Cloudinary dashboard
+    uploadPreset: "kaarlight_unsigned", // Create this in your Cloudinary dashboard
     apiBase: "https://api.cloudinary.com/v1_1",
     maxFileSizeMb: 3 // Cloudinary free tier allows up to 100MB, we limit to 3MB
   };
