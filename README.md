@@ -1,6 +1,6 @@
-# Workora - Fast Local Jobs for Afghans
+# Kaarlight - Fast Local Jobs for Afghans
 
-Workora is a fast, simple job board for Afghan communities, built to help people post local jobs and find nearby freelance or full-time work in minutes.
+Kaarlight is a fast, simple job board for Afghan communities, built to help people post local jobs and find nearby freelance or full-time work in minutes.
 
 **Features**
 - Job listings with search and filters (category, location, type)

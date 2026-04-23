@@ -1,5 +1,5 @@
-# Workora - Robots configuration file
+# Kaarlight - Robots configuration file
 User-agent: *
 Allow: /
 
-Sitemap: https://workora.github.io/workora/sitemap.xml
+Sitemap: https://kaarlight.github.io/kaarlight/sitemap.xml

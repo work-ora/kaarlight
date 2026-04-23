@@ -7,23 +7,23 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="theme-color" content="#2563eb" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googletagmanager.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
-  <title>Sign In / Sign Up - Workora</title>
-  <meta name="description" content="Create an account or sign in to Workora to manage your job postings and applications.">
+  <title>Sign In / Sign Up - Kaarlight</title>
+  <meta name="description" content="Create an account or sign in to Kaarlight to manage your job postings and applications.">
   <meta name="robots" content="noindex,follow">
-  <meta property="og:title" content="Sign In / Sign Up - Workora">
-  <meta property="og:description" content="Create an account or sign in to Workora to manage your job postings and applications.">
+  <meta property="og:title" content="Sign In / Sign Up - Kaarlight">
+  <meta property="og:description" content="Create an account or sign in to Kaarlight to manage your job postings and applications.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://workora.github.io/workora/auth.html">
-  <meta property="og:image" content="https://workora.github.io/workora/site-icon.svg">
+  <meta property="og:url" content="https://kaarlight.github.io/kaarlight/auth.html">
+  <meta property="og:image" content="https://kaarlight.github.io/kaarlight/site-icon.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Sign In / Sign Up - Workora">
-  <meta name="twitter:description" content="Create an account or sign in to Workora to manage your job postings and applications.">
-  <meta name="twitter:image" content="https://workora.github.io/workora/site-icon.svg">
+  <meta name="twitter:title" content="Sign In / Sign Up - Kaarlight">
+  <meta name="twitter:description" content="Create an account or sign in to Kaarlight to manage your job postings and applications.">
+  <meta name="twitter:image" content="https://kaarlight.github.io/kaarlight/site-icon.svg">
   <link rel="icon" href="site-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/site-icon.svg">
-  <link rel="canonical" href="https://workora.github.io/workora/auth.html">
+  <link rel="canonical" href="https://kaarlight.github.io/kaarlight/auth.html">
   <style>
     .auth-container {
       min-height: 100vh;
@@ -308,7 +308,7 @@
       <a href="contact.html" class="back-link" style="margin-left: 0.75rem;">Contact</a>
 
       <div class="auth-header">
-        <h1>Workora</h1>
+        <h1>Kaarlight</h1>
         <p>Find opportunities or post jobs</p>
       </div>
 
@@ -489,7 +489,7 @@
     }
 
     function socialEmail(provider) {
-      return `${provider.toLowerCase()}.${Date.now()}@social.Workora.local`;
+      return `${provider.toLowerCase()}.${Date.now()}@social.Kaarlight.local`;
     }
 
     function getOAuthConfig() {
@@ -638,7 +638,7 @@
           user.oauthProvider = providerName;
           user.oauthUid = authUser.uid;
           if (!user.fullname && authUser.displayName) user.fullname = authUser.displayName;
-          if ((!user.email || user.email.endsWith('@social.Workora.local')) && authUser.email) user.email = authUser.email;
+          if ((!user.email || user.email.endsWith('@social.Kaarlight.local')) && authUser.email) user.email = authUser.email;
           if (!user.phone && authUser.phoneNumber) user.phone = authUser.phoneNumber;
           if (!user.avatar && authUser.photoURL) user.avatar = authUser.photoURL;
         }
@@ -882,7 +882,7 @@
           user.oauthProvider = providerName;
           user.oauthUid = authUser.uid;
           if (!user.fullname && authUser.displayName) user.fullname = authUser.displayName;
-          if ((!user.email || user.email.endsWith('@social.Workora.local')) && authUser.email) user.email = authUser.email;
+          if ((!user.email || user.email.endsWith('@social.Kaarlight.local')) && authUser.email) user.email = authUser.email;
           if (!user.phone && authUser.phoneNumber) user.phone = authUser.phoneNumber;
           if (!user.avatar && authUser.photoURL) user.avatar = authUser.photoURL;
         }
