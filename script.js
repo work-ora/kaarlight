@@ -1158,6 +1158,17 @@ const LayoutManager = {
             navRow.insertBefore(menuToggle, navRow.firstChild);
         }
 
+        let mobileDrawer = navRow.querySelector('.mobile-drawer');
+        if (!mobileDrawer) {
+            mobileDrawer = document.createElement('div');
+            mobileDrawer.className = 'mobile-drawer';
+            navRow.insertBefore(mobileDrawer, menuToggle.nextSibling);
+            const mainNav = navRow.querySelector('.main-nav');
+            const navRight = navRow.querySelector('.nav-right');
+            if (mainNav) mobileDrawer.appendChild(mainNav);
+            if (navRight) mobileDrawer.appendChild(navRight);
+        }
+
         if (menuToggle.dataset.bound === 'true') return;
         menuToggle.dataset.bound = 'true';
 
