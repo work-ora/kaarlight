@@ -3600,6 +3600,54 @@ label {
   }
 }
 
+@media (max-width: 1200px) {
+  body {
+    padding-bottom: 122px;
+  }
+  .mobile-bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    position: fixed;
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 0;
+    z-index: 120;
+    padding: 0.5rem 0.3rem calc(0.5rem + env(safe-area-inset-bottom));
+    background: var(--card);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-bottom: 0;
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -10px 28px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(10px);
+  }
+  .mobile-bottom-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    min-height: 60px;
+    padding: 0.4rem 0.2rem;
+    border-radius: 16px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .mobile-bottom-link svg {
+    width: 20px;
+    height: 20px;
+  }
+  .mobile-bottom-link.active {
+    color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
+  }
+  .mobile-bottom-link:active {
+    transform: translateY(1px);
+  }
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 0 0.85rem;
