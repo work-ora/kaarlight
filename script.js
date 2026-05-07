@@ -1962,7 +1962,7 @@ const LanguageManager = {
         if (mobileWelcome) {
             mobileWelcome.textContent = currentUser
                 ? this.formatWelcome(currentUser.fullname || 'User')
-                : this.t('welcome_prefix') + ' User';
+                : 'Get Started';
         }
 
         document.querySelectorAll('[data-i18n]').forEach((el) => {
@@ -3577,5 +3577,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!hasJobsFilters) {
         Renderer.renderList('jobs-list', allJobs);
         Renderer.renderList('featured-list', allJobs.slice(0, 3));
+        Renderer.renderList('quick-jobs-list', allJobs.slice(0, 2));
     }
 });
