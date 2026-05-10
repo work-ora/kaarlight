@@ -80,6 +80,62 @@ body.dark .feedback-form {
   border-color: rgba(96, 165, 250, 0.16);
 }
 
+body.dark .profile-card,
+body.dark .profile-form,
+body.dark .settings-section,
+body.dark .profile-content .job-card,
+body.dark .modal-content,
+body.dark .profile-tabs,
+body.dark .profile-summary-panel {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.98));
+  border-color: rgba(96, 165, 250, 0.16);
+}
+
+body.dark .profile-card,
+body.dark .settings-section,
+body.dark .profile-content .job-card,
+body.dark .modal-content,
+body.dark .profile-summary-panel {
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+}
+
+body.dark .profile-contact-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(148, 163, 184, 0.18);
+  color: #cbd5e1;
+}
+
+body.dark .stat {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+body.dark .profile-tabs {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+body.dark .profile-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+body.dark .profile-tab.active {
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(96, 165, 250, 0.16);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+}
+
+body.dark .profile-summary-item {
+  border-bottom-color: rgba(148, 163, 184, 0.15);
+}
+
+body.dark .settings-section.danger {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.22);
+}
+
 /* 2. Reset & Base Styles */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 

@@ -257,6 +257,7 @@
       }
 
       document.getElementById('theme-select').value = settings.theme || 'light';
+      document.body.classList.toggle('dark', (settings.theme || 'light') === 'dark');
       document.getElementById('job-search').value = settings.jobSearch || '';
       document.getElementById('job-category').value = settings.jobCategory || 'All';
       document.getElementById('job-sort').value = settings.jobSort || 'newest';
