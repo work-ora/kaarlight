@@ -440,7 +440,7 @@ const FirebaseAuthLoader = {
 
         this.loading = new Promise((resolve) => {
             const script = document.createElement('script');
-            script.src = 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth-compat.js';
+            script.src = 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js';
             script.onload = () => resolve(true);
             script.onerror = () => resolve(false);
             document.head.appendChild(script);
@@ -2769,7 +2769,7 @@ const FirebaseStorageLoader = {
 
         this.loading = new Promise((resolve) => {
             const script = document.createElement('script');
-            script.src = 'https://www.gstatic.com/firebasejs/10.12.3/firebase-storage-compat.js';
+            script.src = 'https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js';
             script.onload = () => resolve(true);
             script.onerror = () => resolve(false);
             document.head.appendChild(script);

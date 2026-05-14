@@ -10,13 +10,14 @@ Critical security fixes have been applied to protect against:
 
 ---
 
-## âœ… Security Fixes Applied
+
+## Security Fixes Applied
 
 ### 1. HTTP Security Headers (.htaccess)
 **File**: `.htaccess`
 
 **What was added:**
-- **Content-Security-Policy**: Blocks inline scripts and restricts resource loading to trusted domains
+- **Content-Security-Policy**: Restricts resource loading to trusted domains. The current policy still permits inline scripts/styles on pages that need them, so removing inline handlers and then dropping `'unsafe-inline'` remains a follow-up hardening task.
 - **X-Content-Type-Options: nosniff**: Prevents MIME-type sniffing attacks
 - **X-Frame-Options: DENY**: Prevents clickjacking by blocking iframe embedding
 - **X-XSS-Protection**: Enables XSS protection in older browsers
@@ -41,7 +42,7 @@ Critical security fixes have been applied to protect against:
 - CSP meta tags as fallback when headers cannot be deployed
 - Restricts all content to `https://` origin
 - Allows scripts only from: Firebase, Google Analytics, Google APIs
-- Blocks inline styles (`'unsafe-inline'` only for essential styling)
+- Allows inline styles temporarily (`'unsafe-inline'`) until inline `style=`, `onclick=`, and page scripts are moved into shared CSS/JS files
 - Prevents form submission to external domains
 
 **Example**:
@@ -116,17 +117,17 @@ Critical security fixes have been applied to protect against:
 
 ---
 
-### 6. Storage Access Control
+### 6. Server File Access Control
 **What's protected** (in `.htaccess`):
 ```apache
-<FilesMatch "^(\.|firebase-init|oauth-config|cloudinary-config|\.git)">
+<FilesMatch "^(\.|\.git)">
     Deny from all
 </FilesMatch>
 ```
 - Blocks direct access to:
   - Hidden files (`.env`, `.htaccess`, `.git`)
-  - Configuration files (`firebase-init.js`, `oauth-config.js`, `cloudinary-config.js`)
   - Git repository metadata
+- Keeps public browser config scripts loadable by the HTML pages; enforce sensitive access in Firebase rules instead.
 
 ---
 
@@ -135,11 +136,11 @@ Critical security fixes have been applied to protect against:
 
 **What it does:**
 - Converts HTML special characters to entities:
-  - `&` â†’ `&amp;`
-  - `<` â†’ `&lt;`
-  - `>` â†’ `&gt;`
-  - `"` â†’ `&quot;`
-  - `'` â†’ `&#39;`
+  - `&` -> `&amp;`
+  - `<` -> `&lt;`
+  - `>` -> `&gt;`
+  - `"` -> `&quot;`
+  - `'` -> `&#39;`
 
 **Usage**: Applied in `Renderer.createJobCard()` for:
 - Job titles
@@ -150,7 +151,7 @@ Critical security fixes have been applied to protect against:
 
 ---
 
-## ðŸ“‹ Security Checklist for Deployment
+## Security Checklist for Deployment
 
 ### Before Going Live:
 
@@ -187,7 +188,7 @@ Critical security fixes have been applied to protect against:
 
 ---
 
-## ðŸ”’ Additional Security Recommendations
+## Additional Security Recommendations
 
 ### 1. Backend Validation (Critical)
 **Always validate on the backend**, not just frontend:
@@ -227,12 +228,12 @@ allow write: if request.auth != null &&
 
 ---
 
-## ðŸ§ª Testing the Security Fixes
+## Testing the Security Fixes
 
 ### Test CSP:
-1. Open DevTools (F12) â†’ Console
-2. Try to execute: `<script>alert('xss')</script>` anywhere
-3. **Expected**: Script blocked, CSP violation logged in Console
+1. Open DevTools (F12) -> Console
+2. Watch for CSP violations while using auth, profile, posting, and uploads
+3. **Expected today**: trusted site scripts load, and any blocked resource is intentional. After inline code is removed and 'unsafe-inline' is dropped, inline script execution should be blocked.
 
 ### Test File Upload:
 1. Try to upload a `.exe`, `.js`, or `.html` file
@@ -248,7 +249,7 @@ allow write: if request.auth != null &&
 
 ---
 
-## ðŸ“ž Support & Questions
+## Support & Questions
 
 If you encounter any security issues:
 1. **Do NOT post details publicly**
@@ -259,5 +260,5 @@ If you encounter any security issues:
 
 **Last Updated**: April 4, 2026  
 **Security Version**: 1.0  
-**Status**: âœ… Production Ready
+**Status**: Production Ready
 

@@ -1,4 +1,4 @@
-# AfgJobs Security Headers (.htaccess)
+# Kaarlight Security Headers (.htaccess)
 # Add this to your Apache server configuration
 
 # Enable mod_headers
@@ -28,8 +28,10 @@
 # Disable directory listing
 Options -Indexes
 
-# Protect sensitive files
-<FilesMatch "^(\.|firebase-init|oauth-config|cloudinary-config|\.git)">
+# Protect server-side and repository internals. Client config scripts are public by
+# design and must remain loadable by the HTML pages; enforce real access control
+# in Firebase security rules.
+<FilesMatch "^(\.|\.git)">
     Deny from all
 </FilesMatch>
 
