@@ -3557,6 +3557,117 @@ const HomePageManager = {
     }
 };
 
+const PageRouter = {
+    currentUrl: window.location.href,
+
+    init() {
+        window.history.replaceState({ url: window.location.href }, '', window.location.href);
+        document.addEventListener('click', (event) => this.onDocumentClick(event));
+        window.addEventListener('popstate', async (event) => {
+            const url = (event.state && event.state.url) ? event.state.url : window.location.href;
+            await this.loadPage(url, false);
+        });
+    },
+
+    onDocumentClick(event) {
+        if (event.defaultPrevented) return;
+
+        const anchor = event.target.closest('a[href]');
+        if (!anchor) return;
+
+        const href = anchor.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+        if (anchor.target === '_blank' || anchor.hasAttribute('download')) return;
+
+        const targetUrl = new URL(href, window.location.href);
+        if (targetUrl.origin !== window.location.origin) return;
+        if (!this.isHtmlPath(targetUrl.pathname)) return;
+        if (targetUrl.pathname === window.location.pathname && targetUrl.search === window.location.search) return;
+
+        event.preventDefault();
+        this.navigate(targetUrl.href);
+    },
+
+    isHtmlPath(pathname) {
+        return pathname === '/' || pathname.endsWith('/index.html') || pathname.endsWith('.html');
+    },
+
+    async navigate(href) {
+        await this.loadPage(href, true);
+    },
+
+    async loadPage(href, pushState = true) {
+        try {
+            const response = await fetch(href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) {
+                window.location.href = href;
+                return;
+            }
+
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const incomingMain = doc.getElementById('main-content');
+            const targetMain = document.getElementById('main-content');
+
+            if (!incomingMain || !targetMain) {
+                window.location.href = href;
+                return;
+            }
+
+            targetMain.innerHTML = incomingMain.innerHTML;
+            document.title = doc.title || document.title;
+
+            const parsedUrl = new URL(href, window.location.origin);
+            if (pushState) {
+                window.history.pushState({ url: href }, '', href);
+            }
+
+            this.updateNavActive(parsedUrl.pathname);
+            this.reinitializePage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            this.currentUrl = href;
+        } catch (error) {
+            console.error('PageRouter failed to load page:', error);
+            window.location.href = href;
+        }
+    },
+
+    updateNavActive(pathname) {
+        const navLinks = document.querySelectorAll('.main-nav a, .mobile-bottom-nav a');
+        navLinks.forEach((link) => {
+            try {
+                const linkUrl = new URL(link.href, window.location.href);
+                const isActive = linkUrl.pathname === pathname || (pathname === '/' && linkUrl.pathname.endsWith('/index.html'));
+                link.classList.toggle('active', isActive);
+                if (isActive) {
+                    link.setAttribute('aria-current', 'page');
+                } else {
+                    link.removeAttribute('aria-current');
+                }
+            } catch {
+                // Ignore invalid URLs.
+            }
+        });
+    },
+
+    async reinitializePage() {
+        LayoutManager.ensureNavRight();
+        LayoutManager.ensureMobileMenu();
+        AuthManager.init();
+        await StatsManager.init();
+        await HomePageManager.init();
+        await SearchEngine.init();
+        FormHandler.init();
+        FeedbackHandler.init();
+        NewsletterHandler.init();
+        JobSeekerHandler.init();
+        AccountAdminManager.init();
+        ReportsManager.init();
+        FeedbackAdminManager.init();
+    }
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     LayoutManager.ensureNavRight();
     LayoutManager.ensureMobileMenu();
@@ -3576,6 +3687,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     AccountAdminManager.init();
     ReportsManager.init();
     FeedbackAdminManager.init();
+
+    PageRouter.init();
 
     const allJobs = await Storage.getAllJobsAsync();
     // Avoid overriding the filtered results on pages where search/filter controls exist.
