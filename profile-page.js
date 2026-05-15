@@ -6,7 +6,15 @@ const KEYS = {
 
     let activeUser = null;
 
-    document.addEventListener('DOMContentLoaded', async function () {
+    function onProfileReady(callback) {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', callback);
+        return;
+      }
+      callback();
+    }
+
+    onProfileReady(async function () {
       activeUser = readJson(KEYS.USER, null);
       if (!activeUser) {
         window.location.href = 'auth.html';
@@ -14,11 +22,11 @@ const KEYS = {
       }
 
       setupTabNavigation();
-      setupFormHandlers();
-      setupModalHandlers();
-      setupBioCounters();
 
       try {
+        setupFormHandlers();
+        setupModalHandlers();
+        setupBioCounters();
         loadProfileData(activeUser);
         await loadUserJobs(activeUser.id, activeUser.email);
       } catch (error) {
@@ -351,22 +359,27 @@ const KEYS = {
     }
 
     function setupTabNavigation() {
-      document.querySelectorAll('.profile-tab').forEach((tab) => {
-        tab.addEventListener('click', function () {
-          const tabName = this.dataset.tab;
-          const targetContent = tabName ? document.getElementById(tabName) : null;
-          if (!targetContent) return;
+      const tabs = document.querySelector('.profile-tabs');
+      if (!tabs || tabs.dataset.bound === 'true') return;
+      tabs.dataset.bound = 'true';
 
-          document.querySelectorAll('.profile-tab-content').forEach((content) => {
-            content.classList.remove('active');
-          });
-          document.querySelectorAll('.profile-tab').forEach((t) => {
-            t.classList.remove('active');
-          });
+      tabs.addEventListener('click', function (event) {
+        const tab = event.target.closest('.profile-tab');
+        if (!tab) return;
 
-          targetContent.classList.add('active');
-          this.classList.add('active');
+        const tabName = tab.dataset.tab;
+        const targetContent = tabName ? document.getElementById(tabName) : null;
+        if (!targetContent) return;
+
+        document.querySelectorAll('.profile-tab-content').forEach((content) => {
+          content.classList.remove('active');
         });
+        document.querySelectorAll('.profile-tab').forEach((item) => {
+          item.classList.remove('active');
+        });
+
+        targetContent.classList.add('active');
+        tab.classList.add('active');
       });
     }
 
