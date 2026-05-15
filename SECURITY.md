@@ -17,7 +17,7 @@ Critical security fixes have been applied to protect against:
 **File**: `.htaccess`
 
 **What was added:**
-- **Content-Security-Policy**: Restricts resource loading to trusted domains. The current policy still permits inline scripts/styles on pages that need them, so removing inline handlers and then dropping `'unsafe-inline'` remains a follow-up hardening task.
+- **Content-Security-Policy**: Restricts resource loading to trusted domains. Inline page scripts and event handlers have been moved into external JS files, and `script-src` no longer uses `'unsafe-inline'`. Inline styles are still allowed temporarily while the remaining `style=` attributes are migrated into CSS.
 - **X-Content-Type-Options: nosniff**: Prevents MIME-type sniffing attacks
 - **X-Frame-Options: DENY**: Prevents clickjacking by blocking iframe embedding
 - **X-XSS-Protection**: Enables XSS protection in older browsers
@@ -42,13 +42,13 @@ Critical security fixes have been applied to protect against:
 - CSP meta tags as fallback when headers cannot be deployed
 - Restricts all content to `https://` origin
 - Allows scripts only from: Firebase, Google Analytics, Google APIs
-- Allows inline styles temporarily (`'unsafe-inline'`) until inline `style=`, `onclick=`, and page scripts are moved into shared CSS/JS files
+- Allows inline styles temporarily (`'unsafe-inline'`) until the remaining `style=` attributes are moved into CSS classes
 - Prevents form submission to external domains
 
 **Example**:
 ```html
 <meta http-equiv="Content-Security-Policy" 
-  content="default-src 'self' https:; script-src 'self' https://www.gstatic.com https://apis.google.com; ..."
+  content="default-src 'self' https:; script-src 'self' 'sha256-k0FGYpH5o5pHEqz4Z6r/07Wh/Ywe1z4/GBypZNO8ZE0=' https://www.gstatic.com https://apis.google.com; ..."
 />
 ```
 
@@ -233,7 +233,7 @@ allow write: if request.auth != null &&
 ### Test CSP:
 1. Open DevTools (F12) -> Console
 2. Watch for CSP violations while using auth, profile, posting, and uploads
-3. **Expected today**: trusted site scripts load, and any blocked resource is intentional. After inline code is removed and 'unsafe-inline' is dropped, inline script execution should be blocked.
+3. **Expected today**: trusted site scripts load, and unexpected inline script execution is blocked. Inline styles are still allowed until the remaining style attributes are migrated.
 
 ### Test File Upload:
 1. Try to upload a `.exe`, `.js`, or `.html` file
@@ -261,4 +261,3 @@ If you encounter any security issues:
 **Last Updated**: April 4, 2026  
 **Security Version**: 1.0  
 **Status**: Production Ready
-

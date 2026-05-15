@@ -41,7 +41,7 @@ server {
     ssl_certificate_key /path/to/key.pem;
 
     # Security Headers
-    add_header Content-Security-Policy "default-src 'self' https:; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
+    add_header Content-Security-Policy "default-src 'self' https:; script-src 'self' 'sha256-k0FGYpH5o5pHEqz4Z6r/07Wh/Ywe1z4/GBypZNO8ZE0=' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "DENY" always;
     add_header X-XSS-Protection "1; mode=block" always;
@@ -90,7 +90,7 @@ sudo systemctl reload nginx
 
 | Header | Value |
 |--------|-------|
-| `Content-Security-Policy` | `default-src 'self' https:; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';` |
+| `Content-Security-Policy` | `default-src 'self' https:; script-src 'self' 'sha256-k0FGYpH5o5pHEqz4Z6r/07Wh/Ywe1z4/GBypZNO8ZE0=' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';` |
 | `X-Content-Type-Options` | `nosniff` |
 | `X-Frame-Options` | `DENY` |
 | `X-XSS-Protection` | `1; mode=block` |
@@ -105,7 +105,7 @@ Add to `<system.webServer>` section:
 ```xml
 <httpProtocol>
     <customHeaders>
-        <add name="Content-Security-Policy" value="default-src 'self' https:; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+        <add name="Content-Security-Policy" value="default-src 'self' https:; script-src 'self' 'sha256-k0FGYpH5o5pHEqz4Z6r/07Wh/Ywe1z4/GBypZNO8ZE0=' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
         <add name="X-Content-Type-Options" value="nosniff" />
         <add name="X-Frame-Options" value="DENY" />
         <add name="X-XSS-Protection" value="1; mode=block" />
@@ -187,7 +187,7 @@ If legitimate features break:
 
 Example: If Google Analytics doesn't load, add to `script-src`:
 ```
-script-src 'self' https://www.gstatic.com https://www.googletagmanager.com https://apis.google.com https://www.google-analytics.com;
+script-src 'self' 'sha256-k0FGYpH5o5pHEqz4Z6r/07Wh/Ywe1z4/GBypZNO8ZE0=' https://www.gstatic.com https://www.googletagmanager.com https://apis.google.com https://www.google-analytics.com;
 ```
 
 ---
@@ -200,4 +200,3 @@ script-src 'self' https://www.gstatic.com https://www.googletagmanager.com https
 4. **Update** CSP as needed for new resources
 
 **Questions?** Check the main `SECURITY.md` file for more details.
-

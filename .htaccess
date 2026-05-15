@@ -4,7 +4,7 @@
 # Enable mod_headers
 <IfModule mod_headers.c>
     # Content Security Policy - Prevent XSS attacks
-    Header set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googletagmanager.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+    Header set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'sha256-k0FGYpH5o5pHEqz4Z6r/07Wh/Ywe1z4/GBypZNO8ZE0=' https://www.gstatic.com https://www.googletagmanager.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
     
     # Prevent MIME type sniffing
     Header set X-Content-Type-Options "nosniff"

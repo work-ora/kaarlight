@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="theme-color" content="#2563eb" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googletagmanager.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'sha256-k0FGYpH5o5pHEqz4Z6r/07Wh/Ywe1z4/GBypZNO8ZE0=' https://www.gstatic.com https://www.googletagmanager.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
   <title>Kaarlight - Fast local jobs for Afghans</title>
   <meta name="description" content="Kaarlight: fast local job listings across Afghanistan. Find work or hire local talent - short-term, freelance, and full-time opportunities.">
   <meta property="og:title" content="Kaarlight - Fast local jobs for Afghans">
@@ -497,29 +497,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="firebase-init.js"></script>
   <script src="script.js" defer></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchBtn = document.getElementById('hero-search-btn');
-      const searchInput = document.getElementById('hero-search');
-
-      if (searchBtn && searchInput) {
-        const performSearch = () => {
-          const query = searchInput.value.trim();
-          if (query) {
-            window.location.href = 'jobs.html?search=' + encodeURIComponent(query);
-          }
-        };
-
-        searchBtn.addEventListener('click', performSearch);
-        searchInput.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            performSearch();
-          }
-        });
-      }
-    });
-  </script>
+  <script src="index-page.js"></script>
 </body>
 </html>
-
