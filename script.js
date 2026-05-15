@@ -2005,6 +2005,9 @@ const LanguageManager = {
 };
 
 const AuthManager = {
+    uiBound: false,
+    firebaseBound: false,
+
     init() {
         const userDisplay = document.getElementById('user-display');
         const authLink = document.getElementById('auth-link');
@@ -2093,27 +2096,31 @@ const AuthManager = {
 
         syncWelcomeFromStorage();
 
-        window.addEventListener('afg-user-updated', syncWelcomeFromStorage);
+        if (!this.uiBound) {
+            this.uiBound = true;
+            window.addEventListener('afg-user-updated', syncWelcomeFromStorage);
 
-        logoutBtn.addEventListener('click', async (event) => {
-            event.preventDefault();
-            if (!confirm(LanguageManager.t('logout_confirm'))) return;
+            logoutBtn.addEventListener('click', async (event) => {
+                event.preventDefault();
+                if (!confirm(LanguageManager.t('logout_confirm'))) return;
 
-            localStorage.removeItem(APP_KEYS.USER);
-            localStorage.removeItem('afg_auth_source');
+                localStorage.removeItem(APP_KEYS.USER);
+                localStorage.removeItem('afg_auth_source');
 
-            if (window.firebase && window.firebase.auth) {
-                try {
-                    await window.firebase.auth().signOut();
-                } catch {
-                    // Ignore Firebase sign-out errors and still clear local session.
+                if (window.firebase && window.firebase.auth) {
+                    try {
+                        await window.firebase.auth().signOut();
+                    } catch {
+                        // Ignore Firebase sign-out errors and still clear local session.
+                    }
                 }
-            }
 
-            window.location.reload();
-        });
+                window.location.reload();
+            });
+        }
 
-        if (window.firebase && window.firebase.auth) {
+        if (window.firebase && window.firebase.auth && !this.firebaseBound) {
+            this.firebaseBound = true;
             const auth = window.firebase.auth();
             auth.onAuthStateChanged(async (fbUser) => {
                 if (fbUser && fbUser.uid) {
@@ -3668,29 +3675,9 @@ const PageRouter = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
-    LayoutManager.ensureNavRight();
-    LayoutManager.ensureMobileMenu();
-    await FirebaseStore.init();
-    await FirebaseAuthLoader.load();
-    LanguageManager.init();
-    ThemeManager.init();
-    TopButton.init();
-    AuthManager.init();
-    await StatsManager.init();
-    await HomePageManager.init();
-    await SearchEngine.init();
-    FormHandler.init();
-    FeedbackHandler.init();
-    NewsletterHandler.init();
-    JobSeekerHandler.init();
-    AccountAdminManager.init();
-    ReportsManager.init();
-    FeedbackAdminManager.init();
-
-    PageRouter.init();
-
-    const allJobs = await Storage.getAllJobsAsync();
+const renderCurrentPageJobs = async (options = {}) => {
+    const useCloud = options.useCloud !== false;
+    const allJobs = useCloud ? await Storage.getAllJobsAsync() : Storage.getAllJobs();
     // Avoid overriding the filtered results on pages where search/filter controls exist.
     const hasJobsFilters = Boolean(
         document.getElementById('jobs-search')
@@ -3703,4 +3690,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         Renderer.renderList('featured-list', allJobs.slice(0, 3));
         Renderer.renderList('quick-jobs-list', allJobs.slice(0, 2));
     }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    LayoutManager.ensureNavRight();
+    LayoutManager.ensureMobileMenu();
+    LanguageManager.init();
+    ThemeManager.init();
+    TopButton.init();
+    AuthManager.init();
+
+    // Paint local data first so the header, hero, and mobile navigation become usable immediately.
+    renderCurrentPageJobs({ useCloud: false });
+    StatsManager.init();
+    HomePageManager.init();
+    SearchEngine.init();
+
+    FormHandler.init();
+    FeedbackHandler.init();
+    NewsletterHandler.init();
+    JobSeekerHandler.init();
+    AccountAdminManager.init();
+    ReportsManager.init();
+    FeedbackAdminManager.init();
+
+    PageRouter.init();
+
+    const refreshFromFirebase = async () => {
+        await FirebaseStore.init();
+        await FirebaseAuthLoader.load();
+        AuthManager.init();
+        await renderCurrentPageJobs({ useCloud: true });
+        await StatsManager.init();
+        await HomePageManager.init();
+    };
+
+    window.setTimeout(() => {
+        refreshFromFirebase().catch((error) => {
+            console.warn('Background Firebase refresh failed:', error);
+        });
+    }, 0);
 });

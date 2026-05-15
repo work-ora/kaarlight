@@ -223,7 +223,6 @@ select:focus-visible {
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(8px);
 }
 
 .nav-row {
@@ -270,7 +269,7 @@ select:focus-visible {
   display: flex;
   gap: 1.5rem;
   align-items: center;
-  transition: all 0.8s ease;
+  transition: color 0.2s ease;
 }
 
 .nav-link {
@@ -342,7 +341,7 @@ select:focus-visible {
   height: 2px;
   border-radius: 999px;
   background: var(--text);
-  transition: transform 0.8s ease, opacity 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .mobile-menu-toggle-inner {
@@ -3484,7 +3483,6 @@ label {
     border-bottom: 0;
     border-radius: 22px 22px 0 0;
     box-shadow: 0 -10px 28px rgba(15, 23, 42, 0.12);
-    backdrop-filter: blur(10px);
   }
   .mobile-bottom-link {
     display: flex;
@@ -3674,7 +3672,6 @@ label {
     border-bottom: 0;
     border-radius: 22px 22px 0 0;
     box-shadow: 0 -10px 28px rgba(15, 23, 42, 0.12);
-    backdrop-filter: blur(10px);
   }
   .mobile-bottom-link {
     display: flex;
