@@ -3640,6 +3640,7 @@ const PageRouter = {
         if (targetUrl.origin !== window.location.origin) return;
         if (!this.isHtmlPath(targetUrl.pathname)) return;
         if (targetUrl.pathname === window.location.pathname && targetUrl.search === window.location.search) return;
+        if (anchor.closest('.main-nav, .mobile-bottom-nav, .nav-auth, .nav-row')) return;
 
         event.preventDefault();
         this.navigate(targetUrl.href);
