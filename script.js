@@ -3711,7 +3711,7 @@ const PageRouter = {
 
     async loadPageScript(src) {
         const existing = document.querySelector(`script[src="${src}"]`);
-        if (existing) return;
+        if (existing) existing.remove();
 
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
