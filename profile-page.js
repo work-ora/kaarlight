@@ -14,7 +14,8 @@ const KEYS = {
       callback();
     }
 
-    onProfileReady(async function () {
+    async function initProfilePage() {
+      if (!document.querySelector('.profile-tabs')) return;
       activeUser = readJson(KEYS.USER, null);
       if (!activeUser) {
         window.location.href = 'auth.html';
@@ -32,7 +33,13 @@ const KEYS = {
       } catch (error) {
         console.error('Profile page initialization failed:', error);
       }
-    });
+    }
+
+    window.KaarlightProfilePage = { init: initProfilePage };
+
+    if (document.currentScript?.dataset.routerPageScript !== 'true') {
+      onProfileReady(initProfilePage);
+    }
 
     function readJson(key, fallback) {
       try {

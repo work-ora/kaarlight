@@ -3053,6 +3053,8 @@ const AccountAdminManager = {
 
         const form = document.getElementById('account-ban-form');
         const empty = document.getElementById('accounts-empty');
+        await FirebaseStore.init();
+        await FirebaseAuthLoader.load();
         await FirebaseAuthState.wait();
         if (!AdminAccess.ensure(list, empty, null)) {
             if (form) form.style.display = 'none';
@@ -3110,6 +3112,26 @@ const FirebaseAuthState = {
 };
 
 const ReportsManager = {
+    async enrichReportsWithJobOwners(reports) {
+        if (!Array.isArray(reports) || !reports.some((report) => report.jobId && !report.posterEmail)) {
+            return reports;
+        }
+
+        const jobs = await Storage.getAllJobsAsync();
+        const jobsById = new Map(jobs.map((job) => [String(job.id), job]));
+        return reports.map((report) => {
+            if (report.posterEmail || !report.jobId) return report;
+            const job = jobsById.get(String(report.jobId));
+            if (!job) return report;
+            return {
+                ...report,
+                posterId: report.posterId || job.posterId || null,
+                posterEmail: report.posterEmail || job.postedBy || '',
+                posterName: report.posterName || job.postedByName || ''
+            };
+        });
+    },
+
     async fetchReports() {
         if (FirebaseStore.enabled && FirebaseStore.db) {
             try {
@@ -3118,20 +3140,22 @@ const ReportsManager = {
                     .orderBy('createdAtMs', 'desc')
                     .limit(REPORTS_LIMIT)
                     .get();
-                return snapshot.docs.map((doc) => ({
+                const reports = snapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                     __source: 'firebase'
                 }));
+                return this.enrichReportsWithJobOwners(reports);
             } catch {
                 // Fall back to local storage below.
             }
         }
 
-        return Utils.readJson(APP_KEYS.REPORTS, []).map((report) => ({
+        const reports = Utils.readJson(APP_KEYS.REPORTS, []).map((report) => ({
             ...report,
             __source: 'local'
         }));
+        return this.enrichReportsWithJobOwners(reports);
     },
 
     renderReports(reports) {
@@ -3163,6 +3187,11 @@ const ReportsManager = {
             const jobLink = report.jobId ? `job-detail.html?id=${report.jobId}` : '';
             const reportId = Utils.escapeHtml(String(report.id || ''));
             const reportSource = Utils.escapeHtml(String(report.__source || 'local'));
+            const posterEmail = Utils.normalizeEmail(report.posterEmail || report.postedBy || '');
+            const posterName = Utils.escapeHtml(report.posterName || report.postedByName || '');
+            const posterLabel = posterEmail
+                ? `<span>Poster: ${Utils.escapeHtml(posterEmail)}</span>`
+                : '';
 
             const jobId = Utils.escapeHtml(String(report.jobId || ''));
             return `
@@ -3171,12 +3200,15 @@ const ReportsManager = {
                     <div class="report-meta">
                         <span class="report-badge">${reason}</span>
                         <span>Reported by: ${reporter}</span>
+                        ${posterLabel}
                         <span>${createdAt}</span>
                     </div>
+                    ${posterName ? `<div class="report-details">Posted by: ${posterName}</div>` : ''}
                     ${details ? `<div class="report-details">${details}</div>` : ''}
                     <div class="report-actions">
                         ${jobLink ? `<a class="btn outline small" href="${jobLink}">View Job</a>` : ''}
                         ${jobId ? `<button class="btn warning small" data-job-id="${jobId}" data-job-delete="true">Delete Job</button>` : ''}
+                        ${posterEmail ? `<button class="btn danger small" data-ban-poster-email="${Utils.escapeHtml(posterEmail)}">Ban Poster</button>` : ''}
                         <button class="btn danger small" data-report-id="${reportId}" data-report-source="${reportSource}">Delete Report</button>
                     </div>
                 </div>
@@ -3190,6 +3222,22 @@ const ReportsManager = {
                 await this.deleteJobAsAdmin(jobId);
                 const refreshed = await this.fetchReports();
                 this.renderReports(refreshed);
+            });
+        });
+
+        list.querySelectorAll('button[data-ban-poster-email]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                const email = btn.getAttribute('data-ban-poster-email') || '';
+                if (!email) return;
+                const reason = prompt(`Reason for banning ${email}?`, 'Bad job post') || '';
+                if (!confirm(`Ban ${email} and stop this account from signing in?`)) return;
+                const result = await Storage.saveAccountBanAsync({ email, reason }, Storage.getCurrentUser());
+                if (!result.ok) {
+                    alert(result.reason === 'cannot-ban-admin' ? 'You cannot ban an admin account.' : 'Could not ban this account.');
+                    return;
+                }
+                alert(result.source === 'firebase' ? 'Poster account banned.' : 'Poster ban saved locally.');
+                await AccountAdminManager.renderAccounts();
             });
         });
 
@@ -3260,6 +3308,8 @@ const ReportsManager = {
 
         const clearBtn = document.getElementById('clear-reports-btn');
         const empty = document.getElementById('reports-empty');
+        await FirebaseStore.init();
+        await FirebaseAuthLoader.load();
         await FirebaseAuthState.wait();
         if (!AdminAccess.ensure(list, empty, clearBtn)) return;
 
@@ -3631,7 +3681,7 @@ const PageRouter = {
             }
 
             this.updateNavActive(parsedUrl.pathname);
-            this.reinitializePage();
+            await this.reinitializePage(parsedUrl);
             window.scrollTo({ top: 0, behavior: 'smooth' });
             this.currentUrl = href;
         } catch (error) {
@@ -3658,7 +3708,46 @@ const PageRouter = {
         });
     },
 
-    async reinitializePage() {
+    async loadPageScript(src) {
+        const existing = document.querySelector(`script[src="${src}"]`);
+        if (existing) return;
+
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.defer = true;
+            script.dataset.routerPageScript = 'true';
+            script.addEventListener('load', resolve, { once: true });
+            script.addEventListener('error', reject, { once: true });
+            document.body.appendChild(script);
+        });
+    },
+
+    async initPageModule(parsedUrl) {
+        const pathname = parsedUrl?.pathname || window.location.pathname;
+        const pageName = pathname.split('/').pop() || 'index.html';
+        const modules = {
+            'profile.html': {
+                src: 'profile-page.js',
+                init: () => window.KaarlightProfilePage?.init?.()
+            },
+            'settings.html': {
+                src: 'settings-page.js',
+                init: () => window.KaarlightSettingsPage?.init?.()
+            },
+            'job-detail.html': {
+                src: 'job-detail-page.js',
+                init: () => window.KaarlightJobDetailPage?.init?.()
+            }
+        };
+
+        const pageModule = modules[pageName];
+        if (!pageModule) return;
+        await this.loadPageScript(pageModule.src);
+        await pageModule.init();
+    },
+
+    async reinitializePage(parsedUrl = new URL(window.location.href)) {
         LayoutManager.ensureNavRight();
         LayoutManager.ensureMobileMenu();
         AuthManager.init();
@@ -3672,6 +3761,7 @@ const PageRouter = {
         AccountAdminManager.init();
         ReportsManager.init();
         FeedbackAdminManager.init();
+        await this.initPageModule(parsedUrl);
     }
 };
 

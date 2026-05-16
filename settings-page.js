@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initSettingsPage() {
+      if (!document.getElementById('settings-form')) return;
       const settings = Storage.getSettings();
       const user = Storage.getCurrentUser();
       const userDisplay = document.getElementById('settings-user');
@@ -119,4 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         setTimeout(() => window.location.reload(), 800);
       });
-    });
+    }
+
+window.KaarlightSettingsPage = { init: initSettingsPage };
+
+if (document.currentScript?.dataset.routerPageScript !== 'true') {
+  document.addEventListener('DOMContentLoaded', initSettingsPage);
+}

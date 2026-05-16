@@ -258,6 +258,9 @@
           const payload = {
             jobId: job.id,
             jobTitle: job.title || 'Untitled',
+            posterId: job.posterId || null,
+            posterEmail: job.postedBy || '',
+            posterName: job.postedByName || '',
             reason,
             details,
             reporterId: currentUser?.id || null,
@@ -291,6 +294,10 @@
     };
 
     // Initialize when page loads
-    document.addEventListener('DOMContentLoaded', () => {
-      JobDetail.init();
-    });
+    window.KaarlightJobDetailPage = JobDetail;
+
+    if (document.currentScript?.dataset.routerPageScript !== 'true') {
+      document.addEventListener('DOMContentLoaded', () => {
+        JobDetail.init();
+      });
+    }
