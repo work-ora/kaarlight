@@ -3755,6 +3755,7 @@ const PageRouter = {
         await StatsManager.init();
         await HomePageManager.init();
         await SearchEngine.init();
+        await renderCurrentPageJobs({ useCloud: true });
         FormHandler.init();
         FeedbackHandler.init();
         NewsletterHandler.init();
